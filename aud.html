@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Audio player</title>
+
+    <style type="text/css">
+        body {
+            background-color: #000;
+        }
+        
+        #container {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 66%;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function loadMediaFromHash() {
+            var hash = window.location.hash;
+            if (hash.startsWith("#"))
+                hash = hash.substring(1);
+
+            var container = document.getElementById("container");
+            var source = container.children[0];
+            source.src = hash;
+            container.load();
+        }
+    </script>
+</head>
+
+<body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+    <audio controls id="container">
+        <source />
+        Your browser does not support the HTML5 audio element
+    </audio>
+</body>
+
+</html>
