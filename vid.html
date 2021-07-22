@@ -24,20 +24,22 @@
     </style>
 
     <script type="text/javascript">
-        function body_onLoad() {
+        function loadMediaFromHash() {
             var hash = window.location.hash;
             if (hash.startsWith("#"))
                 hash = hash.substring(1);
 
-            var source = document.createElement("source");
+            var container = document.getElementById("container");
+            var source = container.children[0];
             source.src = hash;
-            document.getElementById("container").appendChild(source);
+            container.load();
         }
     </script>
 </head>
 
-<body onload="body_onLoad()">
+<body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
     <video controls id="container">
+        <source />
         Your browser does not support the HTML5 video element
     </video>
 </body>
