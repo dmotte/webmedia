@@ -1,6 +1,6 @@
 # webmedia
 
-Collection of HTML5 media players / viewers.
+:notes: Collection of HTML5 media players / viewers.
 
 - :page_facing_up: `aud*.html`: audio players
 - :page_facing_up: `img*.html`: image viewers
