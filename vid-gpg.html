@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Video player</title>
+
+    <style type="text/css">
+      body,
+      td,
+      th {
+        font-family: sans-serif;
+      }
+
+      body {
+        background-color: #000;
+        color: #aaa;
+      }
+
+      input {
+        background-color: #222;
+        color: #ccc;
+        border: 1px solid #888;
+        padding: 10px;
+        font-size: 16px;
+      }
+
+      #container {
+        margin: 0px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+      }
+
+      .modal {
+        margin: 0px;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        padding: 20px;
+
+        background-color: #222;
+        color: #ccc;
+      }
+
+      #modalPsw {
+        width: 50%;
+      }
+      #pswMain {
+        width: calc(100% - 55px);
+        box-sizing: border-box;
+      }
+      #btnLoad {
+        width: 50px;
+        box-sizing: border-box;
+        font-weight: bold;
+      }
+    </style>
+
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/openpgp@6.3.0/dist/openpgp.min.js"
+      integrity="sha384-Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c"
+      crossorigin="anonymous"
+    ></script>
+
+    <script type="text/javascript">
+      function showModal(id) {
+        document
+          .querySelectorAll(".modal")
+          .forEach((modal) => (modal.hidden = modal.id !== id));
+      }
+
+      function showMsg(msg) {
+        document.getElementById("spanMsg").textContent = msg;
+        showModal("modalMsg");
+      }
+
+      function loadMediaFromHash() {
+        let hash = window.location.hash;
+        if (hash.startsWith("#")) hash = hash.substring(1);
+
+        const pswMain = document.getElementById("pswMain");
+
+        const psw = pswMain.value;
+
+        if (psw === "") {
+          showModal("modalPsw");
+          pswMain.focus();
+          return;
+        }
+
+        (async () => {
+          showMsg("Downloading media...");
+
+          const response = await fetch(hash);
+
+          showMsg("Decrypting media...");
+
+          const encryptedMessage = await openpgp.readMessage({
+            binaryMessage: response.body,
+          });
+
+          const { data: decrypted } = await openpgp.decrypt({
+            message: encryptedMessage,
+            passwords: [psw],
+            format: "binary",
+          });
+
+          const chunks = [],
+            reader = decrypted.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+
+          const blob = new Blob(chunks, { type: "application/octet-stream" });
+          const url = URL.createObjectURL(blob);
+
+          const container = document.getElementById("container");
+          const source = container.children[0];
+          source.src = url;
+          container.load();
+
+          showModal("");
+        })().catch((error) => {
+          console.error(error);
+          showMsg(error);
+        });
+      }
+    </script>
+  </head>
+
+  <body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+    <video
+      controls
+      id="container"
+      controlsList="nodownload noremoteplayback"
+      oncontextmenu="return false;"
+    >
+      <source />
+      Your browser does not support the HTML5 video element
+    </video>
+
+    <div id="modalMsg" class="modal" hidden>
+      <span id="spanMsg"></span>
+    </div>
+
+    <div id="modalPsw" class="modal" hidden>
+      <input
+        type="password"
+        id="pswMain"
+        placeholder="Password"
+        onkeypress="if (event.key === 'Enter') btnLoad.click();"
+      />
+      <input
+        type="button"
+        id="btnLoad"
+        value="OK"
+        onclick="loadMediaFromHash()"
+      />
+    </div>
+  </body>
+</html>
