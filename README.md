@@ -18,6 +18,8 @@ Some **usage examples**:
 - `https://dmotte.github.io/webmedia/img-gpg.html#<url-to-gpg-file>`
 - `https://dmotte.github.io/webmedia/vid-gpg.html#<url-to-gpg-file>`
 
+> :bulb: **Tip**: you can add `?play` at the end of the URL hash to autoplay the media once loaded.
+
 The `*-gpg.html` pages can be used to open GPG-encrypted media files created like this:
 
 ```bash

@@ -80,9 +80,24 @@
         showModal("modalMsg");
       }
 
-      function loadMediaFromHash() {
-        let hash = window.location.hash;
+      function parseHash(hash = "") {
+        if (hash === "") hash = window.location.hash;
         if (hash.startsWith("#")) hash = hash.substring(1);
+
+        const index = hash.indexOf("?");
+        let [path, query] = [hash, ""];
+        if (index >= 0)
+          [path, query] = [hash.substring(0, index), hash.substring(index + 1)];
+
+        const cfg = Object.fromEntries(new URLSearchParams(query).entries());
+
+        cfg.play = "play" in cfg;
+
+        return [path, cfg];
+      }
+
+      function loadMediaFromHash() {
+        const [path, cfg] = parseHash();
 
         const pswMain = document.getElementById("pswMain");
 
@@ -97,7 +112,7 @@
         (async () => {
           showMsg("Downloading media...");
 
-          const response = await fetch(hash);
+          const response = await fetch(path);
           if (!response.ok) throw new Error("HTTP error " + response.status);
 
           showMsg("Decrypting media...");
@@ -129,6 +144,8 @@
           container.load();
 
           showModal("");
+
+          if (cfg.play) container.play();
         })().catch((error) => {
           console.error(error);
           showMsg(error);

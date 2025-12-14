@@ -23,14 +23,31 @@
     </style>
 
     <script type="text/javascript">
-      function loadMediaFromHash() {
-        let hash = window.location.hash;
+      function parseHash(hash = "") {
+        if (hash === "") hash = window.location.hash;
         if (hash.startsWith("#")) hash = hash.substring(1);
+
+        const index = hash.indexOf("?");
+        let [path, query] = [hash, ""];
+        if (index >= 0)
+          [path, query] = [hash.substring(0, index), hash.substring(index + 1)];
+
+        const cfg = Object.fromEntries(new URLSearchParams(query).entries());
+
+        cfg.play = "play" in cfg;
+
+        return [path, cfg];
+      }
+
+      function loadMediaFromHash() {
+        const [id, cfg] = parseHash();
 
         const container = document.getElementById("container");
         const source = container.children[0];
-        source.src = "https://drive.google.com/uc?id=" + hash;
+        source.src = "https://drive.google.com/uc?id=" + id;
         container.load();
+
+        if (cfg.play) container.play();
       }
     </script>
   </head>
