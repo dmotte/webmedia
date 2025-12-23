@@ -108,6 +108,14 @@
         }
 
         (async () => {
+          const container = document.getElementById("container");
+
+          const oldURL = container.style.backgroundImage
+            .slice(4, -1)
+            .replace(/^["']|["']$/gu, "");
+          container.style.backgroundImage = "";
+          if (oldURL) URL.revokeObjectURL(oldURL);
+
           showMsg("Downloading media...");
 
           const response = await fetch(path);
@@ -136,7 +144,6 @@
           const blob = new Blob(chunks, { type: "application/octet-stream" });
           const url = URL.createObjectURL(blob);
 
-          const container = document.getElementById("container");
           container.style.backgroundImage = "url(" + url + ")";
 
           showModal("");

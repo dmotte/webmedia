@@ -111,6 +111,14 @@
         }
 
         (async () => {
+          const container = document.getElementById("container");
+          const source = container.children[0];
+
+          const oldURL = source.src;
+          source.src = "";
+          container.load();
+          if (oldURL) URL.revokeObjectURL(oldURL);
+
           showMsg("Downloading media...");
 
           const response = await fetch(path);
@@ -139,8 +147,6 @@
           const blob = new Blob(chunks, { type: "application/octet-stream" });
           const url = URL.createObjectURL(blob);
 
-          const container = document.getElementById("container");
-          const source = container.children[0];
           source.src = url;
           container.load();
 
