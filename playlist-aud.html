@@ -225,8 +225,7 @@
         container.load();
 
         for (const row of tblList.rows)
-          if (row === elem) row.classList.add("font-bold");
-          else row.classList.remove("font-bold");
+          row.classList.toggle("font-bold", row === elem);
 
         // Warning: the following may fail if the user didn't interact with
         // the document first
