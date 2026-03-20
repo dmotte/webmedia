@@ -115,7 +115,7 @@
           const source = container.children[0];
 
           const oldURL = source.src;
-          source.src = "";
+          source.removeAttribute("src");
           container.load();
           if (oldURL) URL.revokeObjectURL(oldURL);
 

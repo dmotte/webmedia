@@ -162,7 +162,7 @@
 
           currentItem = null;
 
-          source.src = "";
+          source.removeAttribute("src");
           container.load();
 
           showMsg("Loading playlist...");
@@ -292,7 +292,7 @@
           (parseInt(currentItem.dataset.index, 10) + 1) % tblList.rows.length;
 
         if (nextIndex === 0 && repeatMode === "off") {
-          source.src = "";
+          source.removeAttribute("src");
           container.load();
           return;
         }
