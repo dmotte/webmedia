@@ -68,93 +68,98 @@
     ></script>
 
     <script type="text/javascript">
-      function showModal(id) {
-        document
-          .querySelectorAll(".modal")
-          .forEach((modal) => (modal.hidden = modal.id !== id));
-      }
-
-      function showMsg(msg) {
-        document.getElementById("spanMsg").textContent = msg;
-        showModal("modalMsg");
-      }
-
-      function parseHash(hash = "") {
-        if (hash === "") hash = window.location.hash;
-        if (hash.startsWith("#")) hash = hash.substring(1);
-
-        const index = hash.indexOf("?");
-        let [path, query] = [hash, ""];
-        if (index >= 0)
-          [path, query] = [hash.substring(0, index), hash.substring(index + 1)];
-
-        const cfg = Object.fromEntries(new URLSearchParams(query).entries());
-
-        return [path, cfg];
-      }
-
-      function loadHash() {
-        const [path, cfg] = parseHash();
-
-        const pswMain = document.getElementById("pswMain");
-
-        const psw = pswMain.value;
-
-        if (psw === "") {
-          showModal("modalPsw");
-          pswMain.focus();
-          return;
+      class App {
+        static showModal(id) {
+          document
+            .querySelectorAll(".modal")
+            .forEach((modal) => (modal.hidden = modal.id !== id));
         }
 
-        (async () => {
-          const container = document.getElementById("container");
+        static showMsg(msg) {
+          document.getElementById("spanMsg").textContent = msg;
+          this.showModal("modalMsg");
+        }
 
-          const oldURL = container.style.backgroundImage
-            .slice(4, -1)
-            .replace(/^["']|["']$/gu, "");
-          container.style.backgroundImage = "";
-          if (oldURL) URL.revokeObjectURL(oldURL);
+        static parseHash(hash = "") {
+          if (hash === "") hash = window.location.hash;
+          if (hash.startsWith("#")) hash = hash.substring(1);
 
-          showMsg("Downloading media...");
+          const index = hash.indexOf("?");
+          let [path, query] = [hash, ""];
+          if (index >= 0)
+            [path, query] = [
+              hash.substring(0, index),
+              hash.substring(index + 1),
+            ];
 
-          const response = await fetch(path);
-          if (!response.ok) throw new Error("HTTP error " + response.status);
+          const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
-          showMsg("Decrypting media...");
+          return [path, cfg];
+        }
 
-          const encryptedMessage = await openpgp.readMessage({
-            binaryMessage: response.body,
-          });
+        static loadHash() {
+          const [path, cfg] = this.parseHash();
 
-          const { data: decrypted } = await openpgp.decrypt({
-            message: encryptedMessage,
-            passwords: [psw],
-            format: "binary",
-          });
+          const pswMain = document.getElementById("pswMain");
 
-          const chunks = [],
-            reader = decrypted.getReader();
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
+          const psw = pswMain.value;
+
+          if (psw === "") {
+            this.showModal("modalPsw");
+            pswMain.focus();
+            return;
           }
 
-          const blob = new Blob(chunks, { type: "application/octet-stream" });
-          const url = URL.createObjectURL(blob);
+          (async () => {
+            const container = document.getElementById("container");
 
-          container.style.backgroundImage = "url(" + url + ")";
+            const oldURL = container.style.backgroundImage
+              .slice(4, -1)
+              .replace(/^["']|["']$/gu, "");
+            container.style.backgroundImage = "";
+            if (oldURL) URL.revokeObjectURL(oldURL);
 
-          showModal("");
-        })().catch((error) => {
-          console.error(error);
-          showMsg(error);
-        });
+            this.showMsg("Downloading media...");
+
+            const response = await fetch(path);
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+
+            this.showMsg("Decrypting media...");
+
+            const encryptedMessage = await openpgp.readMessage({
+              binaryMessage: response.body,
+            });
+
+            const { data: decrypted } = await openpgp.decrypt({
+              message: encryptedMessage,
+              passwords: [psw],
+              format: "binary",
+            });
+
+            const chunks = [],
+              reader = decrypted.getReader();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+            }
+
+            const blob = new Blob(chunks, { type: "application/octet-stream" });
+            const url = URL.createObjectURL(blob);
+
+            container.style.backgroundImage = "url(" + url + ")";
+
+            this.showModal("");
+          })().catch((error) => {
+            console.error(error);
+            this.showMsg(error);
+          });
+        }
       }
     </script>
   </head>
 
-  <body onload="loadHash()" onhashchange="loadHash()">
+  <body onload="App.loadHash()" onhashchange="App.loadHash()">
     <div id="container" oncontextmenu="return false;"></div>
 
     <div id="modalMsg" class="modal" hidden>
@@ -168,12 +173,7 @@
         placeholder="Password"
         onkeypress="if (event.key === 'Enter') btnLoad.click();"
       />
-      <input
-        type="button"
-        id="btnLoad"
-        value="OK"
-        onclick="loadHash()"
-      />
+      <input type="button" id="btnLoad" value="OK" onclick="App.loadHash()" />
     </div>
   </body>
 </html>

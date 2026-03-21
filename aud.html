@@ -22,36 +22,41 @@
     </style>
 
     <script type="text/javascript">
-      function parseHash(hash = "") {
-        if (hash === "") hash = window.location.hash;
-        if (hash.startsWith("#")) hash = hash.substring(1);
+      class App {
+        static parseHash(hash = "") {
+          if (hash === "") hash = window.location.hash;
+          if (hash.startsWith("#")) hash = hash.substring(1);
 
-        const index = hash.indexOf("?");
-        let [path, query] = [hash, ""];
-        if (index >= 0)
-          [path, query] = [hash.substring(0, index), hash.substring(index + 1)];
+          const index = hash.indexOf("?");
+          let [path, query] = [hash, ""];
+          if (index >= 0)
+            [path, query] = [
+              hash.substring(0, index),
+              hash.substring(index + 1),
+            ];
 
-        const cfg = Object.fromEntries(new URLSearchParams(query).entries());
+          const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
-        cfg.play = "play" in cfg;
+          cfg.play = "play" in cfg;
 
-        return [path, cfg];
-      }
+          return [path, cfg];
+        }
 
-      function loadHash() {
-        const [path, cfg] = parseHash();
+        static loadHash() {
+          const [path, cfg] = this.parseHash();
 
-        const container = document.getElementById("container");
-        const source = container.children[0];
-        source.src = path;
-        container.load();
+          const container = document.getElementById("container");
+          const source = container.children[0];
+          source.src = path;
+          container.load();
 
-        if (cfg.play) container.play();
+          if (cfg.play) container.play();
+        }
       }
     </script>
   </head>
 
-  <body onload="loadHash()" onhashchange="loadHash()">
+  <body onload="App.loadHash()" onhashchange="App.loadHash()">
     <audio controls id="container">
       <source />
       Your browser does not support the HTML5 audio element

@@ -120,267 +120,279 @@
         );
       }
 
-      function showModal(id) {
-        document
-          .querySelectorAll(".modal")
-          .forEach((modal) => (modal.hidden = modal.id !== id));
-      }
+      class App {
+        static showModal(id) {
+          document
+            .querySelectorAll(".modal")
+            .forEach((modal) => (modal.hidden = modal.id !== id));
+        }
 
-      function showMsg(msg) {
-        document.getElementById("spanMsg").textContent = msg;
-        showModal("modalMsg");
-      }
+        static showMsg(msg) {
+          document.getElementById("spanMsg").textContent = msg;
+          this.showModal("modalMsg");
+        }
 
-      function parseHash(hash = "") {
-        if (hash === "") hash = window.location.hash;
-        if (hash.startsWith("#")) hash = hash.substring(1);
+        static parseHash(hash = "") {
+          if (hash === "") hash = window.location.hash;
+          if (hash.startsWith("#")) hash = hash.substring(1);
 
-        const index = hash.indexOf("?");
-        let [path, query] = [hash, ""];
-        if (index >= 0)
-          [path, query] = [hash.substring(0, index), hash.substring(index + 1)];
+          const index = hash.indexOf("?");
+          let [path, query] = [hash, ""];
+          if (index >= 0)
+            [path, query] = [
+              hash.substring(0, index),
+              hash.substring(index + 1),
+            ];
 
-        const cfg = Object.fromEntries(new URLSearchParams(query).entries());
+          const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
-        cfg.item = parseInt(cfg.item ?? "-1", 10);
+          cfg.item = parseInt(cfg.item ?? "-1", 10);
 
-        return [path, cfg];
-      }
+          return [path, cfg];
+        }
 
-      let shuffleEnabled = false;
-      let repeatMode = "off"; // Possible values: "off", "all", "one"
+        static shuffleEnabled = false;
+        static repeatMode = "off"; // Possible values: "off", "all", "one"
 
-      let currentItem = null;
+        static currentItem = null;
 
-      function loadHash() {
-        const [path, cfg] = parseHash();
+        static loadHash() {
+          const [path, cfg] = this.parseHash();
 
-        (async () => {
-          const container = document.getElementById("container");
-          const source = container.children[0];
+          (async () => {
+            const container = document.getElementById("container");
+            const source = container.children[0];
 
-          currentItem = null;
+            this.currentItem = null;
 
-          source.removeAttribute("src");
-          container.load();
+            source.removeAttribute("src");
+            container.load();
 
-          showMsg("Loading playlist...");
+            this.showMsg("Loading playlist...");
 
-          const response = await fetch(path);
-          if (!response.ok) throw new Error("HTTP error " + response.status);
-          const responseText = await response.text();
-          const lines = responseText.split(/\r?\n/u);
+            const response = await fetch(path);
+            if (!response.ok) throw new Error("HTTP error " + response.status);
+            const responseText = await response.text();
+            const lines = responseText.split(/\r?\n/u);
 
-          const tblList = document.getElementById("tblList");
+            const tblList = document.getElementById("tblList");
 
-          let tableHTML = "";
-          let itemTitle = "";
-          let itemIndex = 0;
-          for (const line of lines) {
-            if (line === "") continue;
+            let tableHTML = "";
+            let itemTitle = "";
+            let itemIndex = 0;
+            for (const line of lines) {
+              if (line === "") continue;
 
-            if (line.startsWith("#")) {
-              if (line.startsWith("#EXTINF:")) itemTitle = line.split(",")[1];
+              if (line.startsWith("#")) {
+                if (line.startsWith("#EXTINF:")) itemTitle = line.split(",")[1];
 
-              continue;
+                continue;
+              }
+
+              tableHTML += `
+                <tr class="cursor-pointer" title="${xmlescape(itemTitle)}"
+                  data-index="${itemIndex++}" data-url="${xmlescape(line)}"
+                  onclick="App.trItem_onclick(this)">
+                  <td>
+                    <span class="material-symbols-outlined">music_note</span>
+                  </td>
+                  <td>${xmlescape(itemTitle)}</td>
+                </tr>
+              `;
             }
 
-            tableHTML += `
-              <tr class="cursor-pointer" title="${xmlescape(itemTitle)}"
-                data-index="${itemIndex++}" data-url="${xmlescape(line)}"
-                onclick="trItem_onclick(this)">
-                <td>
-                  <span class="material-symbols-outlined">music_note</span>
-                </td>
-                <td>${xmlescape(itemTitle)}</td>
-              </tr>
-            `;
-          }
+            document.getElementById("tblList").innerHTML = tableHTML;
 
-          document.getElementById("tblList").innerHTML = tableHTML;
+            if (cfg.item >= 0) {
+              if (cfg.item >= tblList.rows.length)
+                throw new Error("Invalid item index " + cfg.item);
 
-          if (cfg.item >= 0) {
-            if (cfg.item >= tblList.rows.length)
-              throw new Error("Invalid item index " + cfg.item);
+              tblList.rows[cfg.item].click();
+            }
 
-            tblList.rows[cfg.item].click();
-          }
-
-          showModal("");
-        })().catch((error) => {
-          console.error(error);
-          showMsg(error);
-        });
-      }
-
-      function trItem_onclick(elem) {
-        const container = document.getElementById("container");
-        const source = container.children[0];
-        const tblList = document.getElementById("tblList");
-
-        currentItem = elem;
-
-        source.src = elem.dataset.url;
-        container.load();
-
-        for (const row of tblList.rows)
-          row.classList.toggle("font-bold", row === elem);
-
-        // Warning: the following may fail if the user didn't interact with
-        // the document first
-        container.play();
-      }
-
-      function btnShuffle_onclick() {
-        const btnShuffle = document.getElementById("btnShuffle");
-
-        shuffleEnabled = !shuffleEnabled;
-
-        btnShuffle.classList.toggle("color333", !shuffleEnabled);
-      }
-
-      function btnPrevious_onclick() {
-        const container = document.getElementById("container");
-        const source = container.children[0];
-        const tblList = document.getElementById("tblList");
-
-        if (tblList.rows.length === 0) return;
-
-        if (shuffleEnabled) {
-          tblList.rows[Math.floor(Math.random() * tblList.rows.length)].click();
-          return;
+            this.showModal("");
+          })().catch((error) => {
+            console.error(error);
+            this.showMsg(error);
+          });
         }
 
-        if (currentItem === null) {
-          tblList.rows[0].click();
-          return;
-        }
+        static trItem_onclick(elem) {
+          const container = document.getElementById("container");
+          const source = container.children[0];
+          const tblList = document.getElementById("tblList");
 
-        const prevIndex =
-          (parseInt(currentItem.dataset.index, 10) + tblList.rows.length - 1) %
-          tblList.rows.length;
+          this.currentItem = elem;
 
-        tblList.rows[prevIndex].click();
-      }
-
-      function btnPlayPause_onclick() {
-        const container = document.getElementById("container");
-
-        if (container.paused) container.play();
-        else container.pause();
-      }
-
-      function btnNext_onclick() {
-        const container = document.getElementById("container");
-        const source = container.children[0];
-        const tblList = document.getElementById("tblList");
-
-        if (tblList.rows.length === 0) return;
-
-        if (shuffleEnabled) {
-          tblList.rows[Math.floor(Math.random() * tblList.rows.length)].click();
-          return;
-        }
-
-        if (currentItem === null) {
-          tblList.rows[0].click();
-          return;
-        }
-
-        const nextIndex =
-          (parseInt(currentItem.dataset.index, 10) + 1) % tblList.rows.length;
-
-        if (nextIndex === 0 && repeatMode === "off") {
-          source.removeAttribute("src");
+          source.src = elem.dataset.url;
           container.load();
-          return;
+
+          for (const row of tblList.rows)
+            row.classList.toggle("font-bold", row === elem);
+
+          // Warning: the following may fail if the user didn't interact with
+          // the document first
+          container.play();
         }
 
-        tblList.rows[nextIndex].click();
-      }
+        static btnShuffle_onclick() {
+          const btnShuffle = document.getElementById("btnShuffle");
 
-      function btnRepeat_onclick() {
-        const btnRepeat = document.getElementById("btnRepeat");
+          this.shuffleEnabled = !this.shuffleEnabled;
 
-        switch (repeatMode) {
-          case "off":
-            repeatMode = "all";
-            btnRepeat.textContent = "repeat";
-            btnRepeat.classList.remove("color333");
-            break;
-          case "all":
-            repeatMode = "one";
-            btnRepeat.textContent = "repeat_one";
-            btnRepeat.classList.remove("color333");
-            break;
-          case "one":
-            repeatMode = "off";
-            btnRepeat.textContent = "repeat";
-            btnRepeat.classList.add("color333");
-            break;
-          default:
-            throw new Error("Invalid repeat mode " + repeatMode);
+          btnShuffle.classList.toggle("color333", !this.shuffleEnabled);
         }
-      }
 
-      function rangeSeek_oninput() {
-        const container = document.getElementById("container"),
-          rangeSeek = document.getElementById("rangeSeek");
+        static btnPrevious_onclick() {
+          const container = document.getElementById("container");
+          const source = container.children[0];
+          const tblList = document.getElementById("tblList");
 
-        container.currentTime = parseFloat(rangeSeek.value);
-      }
+          if (tblList.rows.length === 0) return;
 
-      function container_onloadedmetadata() {
-        const container = document.getElementById("container"),
-          rangeSeek = document.getElementById("rangeSeek"),
-          spanTimeDuration = document.getElementById("spanTimeDuration");
+          if (this.shuffleEnabled) {
+            tblList.rows[
+              Math.floor(Math.random() * tblList.rows.length)
+            ].click();
+            return;
+          }
 
-        rangeSeek.max = container.duration;
-        spanTimeDuration.textContent = formatTime(container.duration);
-      }
+          if (this.currentItem === null) {
+            tblList.rows[0].click();
+            return;
+          }
 
-      function container_ontimeupdate() {
-        const container = document.getElementById("container"),
-          rangeSeek = document.getElementById("rangeSeek"),
-          spanTimeCurrent = document.getElementById("spanTimeCurrent");
+          const prevIndex =
+            (parseInt(this.currentItem.dataset.index, 10) +
+              tblList.rows.length -
+              1) %
+            tblList.rows.length;
 
-        rangeSeek.value = container.currentTime;
-        spanTimeCurrent.textContent = formatTime(container.currentTime);
-      }
+          tblList.rows[prevIndex].click();
+        }
 
-      function container_onended() {
-        const container = document.getElementById("container"),
-          btnNext = document.getElementById("btnNext");
+        static btnPlayPause_onclick() {
+          const container = document.getElementById("container");
 
-        if (repeatMode === "one") container.play();
-        else btnNext.click();
-      }
+          if (container.paused) container.play();
+          else container.pause();
+        }
 
-      function container_onplay() {
-        const btnPlayPause = document.getElementById("btnPlayPause");
+        static btnNext_onclick() {
+          const container = document.getElementById("container");
+          const source = container.children[0];
+          const tblList = document.getElementById("tblList");
 
-        btnPlayPause.textContent = "pause";
-        btnPlayPause.title = "Pause";
-      }
+          if (tblList.rows.length === 0) return;
 
-      function container_onpause() {
-        const btnPlayPause = document.getElementById("btnPlayPause");
+          if (this.shuffleEnabled) {
+            tblList.rows[
+              Math.floor(Math.random() * tblList.rows.length)
+            ].click();
+            return;
+          }
 
-        btnPlayPause.textContent = "play_arrow";
-        btnPlayPause.title = "Play";
+          if (this.currentItem === null) {
+            tblList.rows[0].click();
+            return;
+          }
+
+          const nextIndex =
+            (parseInt(this.currentItem.dataset.index, 10) + 1) %
+            tblList.rows.length;
+
+          if (nextIndex === 0 && this.repeatMode === "off") {
+            source.removeAttribute("src");
+            container.load();
+            return;
+          }
+
+          tblList.rows[nextIndex].click();
+        }
+
+        static btnRepeat_onclick() {
+          const btnRepeat = document.getElementById("btnRepeat");
+
+          switch (this.repeatMode) {
+            case "off":
+              this.repeatMode = "all";
+              btnRepeat.textContent = "repeat";
+              btnRepeat.classList.remove("color333");
+              break;
+            case "all":
+              this.repeatMode = "one";
+              btnRepeat.textContent = "repeat_one";
+              btnRepeat.classList.remove("color333");
+              break;
+            case "one":
+              this.repeatMode = "off";
+              btnRepeat.textContent = "repeat";
+              btnRepeat.classList.add("color333");
+              break;
+            default:
+              throw new Error("Invalid repeat mode " + this.repeatMode);
+          }
+        }
+
+        static rangeSeek_oninput() {
+          const container = document.getElementById("container"),
+            rangeSeek = document.getElementById("rangeSeek");
+
+          container.currentTime = parseFloat(rangeSeek.value);
+        }
+
+        static container_onloadedmetadata() {
+          const container = document.getElementById("container"),
+            rangeSeek = document.getElementById("rangeSeek"),
+            spanTimeDuration = document.getElementById("spanTimeDuration");
+
+          rangeSeek.max = container.duration;
+          spanTimeDuration.textContent = formatTime(container.duration);
+        }
+
+        static container_ontimeupdate() {
+          const container = document.getElementById("container"),
+            rangeSeek = document.getElementById("rangeSeek"),
+            spanTimeCurrent = document.getElementById("spanTimeCurrent");
+
+          rangeSeek.value = container.currentTime;
+          spanTimeCurrent.textContent = formatTime(container.currentTime);
+        }
+
+        static container_onended() {
+          const container = document.getElementById("container"),
+            btnNext = document.getElementById("btnNext");
+
+          if (this.repeatMode === "one") container.play();
+          else btnNext.click();
+        }
+
+        static container_onplay() {
+          const btnPlayPause = document.getElementById("btnPlayPause");
+
+          btnPlayPause.textContent = "pause";
+          btnPlayPause.title = "Pause";
+        }
+
+        static container_onpause() {
+          const btnPlayPause = document.getElementById("btnPlayPause");
+
+          btnPlayPause.textContent = "play_arrow";
+          btnPlayPause.title = "Play";
+        }
       }
     </script>
   </head>
 
-  <body onload="loadHash()" onhashchange="loadHash()">
+  <body onload="App.loadHash()" onhashchange="App.loadHash()">
     <audio
       hidden
       id="container"
-      ontimeupdate="container_ontimeupdate()"
-      onloadedmetadata="container_onloadedmetadata()"
-      onended="container_onended()"
-      onplay="container_onplay()"
-      onpause="container_onpause()"
+      ontimeupdate="App.container_ontimeupdate()"
+      onloadedmetadata="App.container_onloadedmetadata()"
+      onended="App.container_onended()"
+      onplay="App.container_onplay()"
+      onpause="App.container_onpause()"
     >
       <source />
       Your browser does not support the HTML5 audio element
@@ -400,7 +412,7 @@
             class="cursor-pointer material-symbols-outlined color333"
             title="Shuffle"
             style="font-size: 16px"
-            onclick="btnShuffle_onclick()"
+            onclick="App.btnShuffle_onclick()"
             >shuffle</span
           >
 
@@ -411,7 +423,7 @@
             class="cursor-pointer material-symbols-outlined"
             title="Previous"
             style="font-size: 24px"
-            onclick="btnPrevious_onclick()"
+            onclick="App.btnPrevious_onclick()"
             >skip_previous</span
           >
           <span
@@ -419,7 +431,7 @@
             class="cursor-pointer material-symbols-outlined"
             title="Play"
             style="font-size: 40px"
-            onclick="btnPlayPause_onclick()"
+            onclick="App.btnPlayPause_onclick()"
             >play_arrow</span
           >
           <span
@@ -427,7 +439,7 @@
             class="cursor-pointer material-symbols-outlined"
             title="Next"
             style="font-size: 24px"
-            onclick="btnNext_onclick()"
+            onclick="App.btnNext_onclick()"
             >skip_next</span
           >
 
@@ -438,7 +450,7 @@
             class="cursor-pointer material-symbols-outlined color333"
             title="Repeat mode"
             style="font-size: 16px"
-            onclick="btnRepeat_onclick()"
+            onclick="App.btnRepeat_onclick()"
             >repeat</span
           >
         </div>
@@ -454,7 +466,7 @@
             value="0"
             class="cursor-pointer"
             style="flex: 1"
-            oninput="rangeSeek_oninput()"
+            oninput="App.rangeSeek_oninput()"
           />
           <span id="spanTimeDuration" class="font-monospace">--:--</span>
         </div>

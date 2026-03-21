@@ -22,31 +22,36 @@
     </style>
 
     <script type="text/javascript">
-      function parseHash(hash = "") {
-        if (hash === "") hash = window.location.hash;
-        if (hash.startsWith("#")) hash = hash.substring(1);
+      class App {
+        static parseHash(hash = "") {
+          if (hash === "") hash = window.location.hash;
+          if (hash.startsWith("#")) hash = hash.substring(1);
 
-        const index = hash.indexOf("?");
-        let [path, query] = [hash, ""];
-        if (index >= 0)
-          [path, query] = [hash.substring(0, index), hash.substring(index + 1)];
+          const index = hash.indexOf("?");
+          let [path, query] = [hash, ""];
+          if (index >= 0)
+            [path, query] = [
+              hash.substring(0, index),
+              hash.substring(index + 1),
+            ];
 
-        const cfg = Object.fromEntries(new URLSearchParams(query).entries());
+          const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
-        return [path, cfg];
-      }
+          return [path, cfg];
+        }
 
-      function loadHash() {
-        const [id, cfg] = parseHash();
+        static loadHash() {
+          const [id, cfg] = this.parseHash();
 
-        const container = document.getElementById("container");
-        container.style.backgroundImage =
-          "url(https://drive.google.com/uc?id=" + id + ")";
+          const container = document.getElementById("container");
+          container.style.backgroundImage =
+            "url(https://drive.google.com/uc?id=" + id + ")";
+        }
       }
     </script>
   </head>
 
-  <body onload="loadHash()" onhashchange="loadHash()">
+  <body onload="App.loadHash()" onhashchange="App.loadHash()">
     <div id="container"></div>
   </body>
 </html>
