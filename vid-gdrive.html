@@ -39,7 +39,7 @@
         return [path, cfg];
       }
 
-      function loadMediaFromHash() {
+      function loadHash() {
         const [id, cfg] = parseHash();
 
         const container = document.getElementById("container");
@@ -52,7 +52,7 @@
     </script>
   </head>
 
-  <body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+  <body onload="loadHash()" onhashchange="loadHash()">
     <video controls id="container">
       <source />
       Your browser does not support the HTML5 video element

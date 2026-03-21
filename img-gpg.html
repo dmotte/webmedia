@@ -93,7 +93,7 @@
         return [path, cfg];
       }
 
-      function loadMediaFromHash() {
+      function loadHash() {
         const [path, cfg] = parseHash();
 
         const pswMain = document.getElementById("pswMain");
@@ -154,7 +154,7 @@
     </script>
   </head>
 
-  <body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+  <body onload="loadHash()" onhashchange="loadHash()">
     <div id="container" oncontextmenu="return false;"></div>
 
     <div id="modalMsg" class="modal" hidden>
@@ -172,7 +172,7 @@
         type="button"
         id="btnLoad"
         value="OK"
-        onclick="loadMediaFromHash()"
+        onclick="loadHash()"
       />
     </div>
   </body>

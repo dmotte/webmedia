@@ -36,7 +36,7 @@
         return [path, cfg];
       }
 
-      function loadMediaFromHash() {
+      function loadHash() {
         const [id, cfg] = parseHash();
 
         const container = document.getElementById("container");
@@ -46,7 +46,7 @@
     </script>
   </head>
 
-  <body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+  <body onload="loadHash()" onhashchange="loadHash()">
     <div id="container"></div>
   </body>
 </html>

@@ -96,7 +96,7 @@
         return [path, cfg];
       }
 
-      function loadMediaFromHash() {
+      function loadHash() {
         const [path, cfg] = parseHash();
 
         const pswMain = document.getElementById("pswMain");
@@ -160,7 +160,7 @@
     </script>
   </head>
 
-  <body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+  <body onload="loadHash()" onhashchange="loadHash()">
     <video
       controls
       id="container"
@@ -186,7 +186,7 @@
         type="button"
         id="btnLoad"
         value="OK"
-        onclick="loadMediaFromHash()"
+        onclick="loadHash()"
       />
     </div>
   </body>

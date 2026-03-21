@@ -152,7 +152,7 @@
 
       let currentItem = null;
 
-      function loadMediaFromHash() {
+      function loadHash() {
         const [path, cfg] = parseHash();
 
         (async () => {
@@ -372,7 +372,7 @@
     </script>
   </head>
 
-  <body onload="loadMediaFromHash()" onhashchange="loadMediaFromHash()">
+  <body onload="loadHash()" onhashchange="loadHash()">
     <audio
       hidden
       id="container"
