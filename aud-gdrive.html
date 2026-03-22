@@ -47,7 +47,10 @@
 
           const container = document.getElementById("container");
           const source = container.children[0];
-          source.src = "https://drive.google.com/uc?id=" + id;
+
+          if (id === "") source.removeAttribute("src");
+          else source.src = "https://drive.google.com/uc?id=" + id;
+
           container.load();
 
           if (cfg.play) container.play();

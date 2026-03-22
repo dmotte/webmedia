@@ -162,11 +162,19 @@
           (async () => {
             const container = document.getElementById("container");
             const source = container.children[0];
+            const tblList = document.getElementById("tblList");
 
             this.currentItem = null;
 
             source.removeAttribute("src");
             container.load();
+
+            tblList.innerHTML = "";
+
+            if (path === "") {
+              this.showModal("");
+              return;
+            }
 
             this.showMsg("Loading playlist...");
 
@@ -174,8 +182,6 @@
             if (!response.ok) throw new Error("HTTP error " + response.status);
             const responseText = await response.text();
             const lines = responseText.split(/\r?\n/u);
-
-            const tblList = document.getElementById("tblList");
 
             let tableHTML = "";
             let itemTitle = "";
@@ -201,7 +207,7 @@
               `;
             }
 
-            document.getElementById("tblList").innerHTML = tableHTML;
+            tblList.innerHTML = tableHTML;
 
             if (cfg.item >= 0) {
               if (cfg.item >= tblList.rows.length)

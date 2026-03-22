@@ -47,7 +47,10 @@
 
           const container = document.getElementById("container");
           const source = container.children[0];
-          source.src = path;
+
+          if (path === "") source.removeAttribute("src");
+          else source.src = path;
+
           container.load();
 
           if (cfg.play) container.play();

@@ -44,8 +44,11 @@
           const [id, cfg] = this.parseHash();
 
           const container = document.getElementById("container");
-          container.style.backgroundImage =
-            "url(https://drive.google.com/uc?id=" + id + ")";
+
+          if (id === "") container.style.backgroundImage = "";
+          else
+            container.style.backgroundImage =
+              "url(https://drive.google.com/uc?id=" + id + ")";
         }
       }
     </script>

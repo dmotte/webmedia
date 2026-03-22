@@ -44,7 +44,9 @@
           const [path, cfg] = this.parseHash();
 
           const container = document.getElementById("container");
-          container.style.backgroundImage = "url(" + path + ")";
+
+          if (id === "") container.style.backgroundImage = "";
+          else container.style.backgroundImage = "url(" + path + ")";
         }
       }
     </script>

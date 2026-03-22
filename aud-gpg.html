@@ -121,6 +121,11 @@
             container.load();
             if (oldURL) URL.revokeObjectURL(oldURL);
 
+            if (path === "") {
+              this.showModal("");
+              return;
+            }
+
             this.showMsg("Downloading media...");
 
             const response = await fetch(path);
