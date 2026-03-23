@@ -114,14 +114,18 @@
           .replaceAll("'", "&apos;");
       }
 
-      function formatTime(sec) {
-        if (!isFinite(sec) || sec < 0) return "--:--";
+      function formatDuration(sec) {
+        if (!isFinite(sec)) return "";
 
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec / 60) % 60);
-        const s = Math.floor(sec % 60);
+        const sign = sec < 0 ? "-" : "",
+          absSec = Math.abs(sec);
+
+        const h = Math.floor(absSec / 3600),
+          m = Math.floor((absSec / 60) % 60),
+          s = Math.floor(absSec % 60);
 
         return (
+          sign +
           (h > 0 ? `${h}:` : "") +
           String(m).padStart(2, "0") +
           ":" +
@@ -362,7 +366,7 @@
             spanTimeDuration = document.getElementById("spanTimeDuration");
 
           rangeSeek.max = container.duration;
-          spanTimeDuration.textContent = formatTime(container.duration);
+          spanTimeDuration.textContent = formatDuration(container.duration);
         }
 
         static container_ontimeupdate() {
@@ -371,7 +375,7 @@
             spanTimeCurrent = document.getElementById("spanTimeCurrent");
 
           rangeSeek.value = container.currentTime;
-          spanTimeCurrent.textContent = formatTime(container.currentTime);
+          spanTimeCurrent.textContent = formatDuration(container.currentTime);
         }
 
         static container_onended() {
