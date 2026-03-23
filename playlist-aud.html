@@ -16,17 +16,22 @@
     <style type="text/css">
       :root {
         color-scheme: light dark;
+
+        --modal-bg: #eee;
+        --lower-bg: #eee;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --modal-bg: #000;
+          --lower-bg: #000;
+        }
       }
 
       body,
       td,
       th {
         font-family: sans-serif;
-      }
-
-      body {
-        background-color: #222;
-        color: #ccc;
       }
 
       .font-monospace {
@@ -43,8 +48,8 @@
         cursor: pointer;
       }
 
-      .color333 {
-        color: #333;
+      .color-grey {
+        color: #888;
       }
 
       .modal {
@@ -55,8 +60,7 @@
         transform: translate(-50%, -50%);
         padding: 20px;
 
-        background-color: #111;
-        color: #ccc;
+        background-color: var(--modal-bg);
       }
 
       #divUpperOut {
@@ -74,7 +78,7 @@
       }
 
       #divLowerOut {
-        background-color: #111;
+        background-color: var(--lower-bg);
 
         margin: 0px;
         position: absolute;
@@ -251,7 +255,7 @@
 
           this.shuffleEnabled = !this.shuffleEnabled;
 
-          btnShuffle.classList.toggle("color333", !this.shuffleEnabled);
+          btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
         }
 
         static btnPrevious_onclick() {
@@ -328,17 +332,17 @@
             case "off":
               this.repeatMode = "all";
               btnRepeat.textContent = "repeat";
-              btnRepeat.classList.remove("color333");
+              btnRepeat.classList.remove("color-grey");
               break;
             case "all":
               this.repeatMode = "one";
               btnRepeat.textContent = "repeat_one";
-              btnRepeat.classList.remove("color333");
+              btnRepeat.classList.remove("color-grey");
               break;
             case "one":
               this.repeatMode = "off";
               btnRepeat.textContent = "repeat";
-              btnRepeat.classList.add("color333");
+              btnRepeat.classList.add("color-grey");
               break;
             default:
               throw new Error("Invalid repeat mode " + this.repeatMode);
@@ -420,7 +424,7 @@
         <div id="divControls">
           <span
             id="btnShuffle"
-            class="cursor-pointer material-symbols-outlined color333"
+            class="cursor-pointer material-symbols-outlined color-grey"
             title="Shuffle"
             style="font-size: 16px"
             onclick="App.btnShuffle_onclick()"
@@ -458,7 +462,7 @@
 
           <span
             id="btnRepeat"
-            class="cursor-pointer material-symbols-outlined color333"
+            class="cursor-pointer material-symbols-outlined color-grey"
             title="Repeat mode"
             style="font-size: 16px"
             onclick="App.btnRepeat_onclick()"
