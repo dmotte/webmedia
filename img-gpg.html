@@ -10,6 +10,22 @@
     <style type="text/css">
       :root {
         color-scheme: light dark;
+
+        --input-bg: #eee;
+        --input-text: #000;
+        --input-border: #888;
+
+        --modal-bg: #eee;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --input-bg: #000;
+          --input-text: #ccc;
+          --input-border: #888;
+
+          --modal-bg: #000;
+        }
       }
 
       body,
@@ -19,9 +35,9 @@
       }
 
       input {
-        background-color: #222;
-        color: #ccc;
-        border: 1px solid #888;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
         padding: 10px;
         font-size: 16px;
       }
@@ -33,7 +49,6 @@
         top: 0px;
         width: 100%;
         height: 100%;
-        background-color: #000;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center center;
@@ -47,8 +62,7 @@
         transform: translate(-50%, -50%);
         padding: 20px;
 
-        background-color: #222;
-        color: #ccc;
+        background-color: var(--modal-bg);
       }
 
       #modalPsw {
