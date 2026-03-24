@@ -48,6 +48,10 @@
         cursor: pointer;
       }
 
+      .select-none {
+        user-select: none;
+      }
+
       .color-grey {
         color: #888;
       }
@@ -425,7 +429,7 @@
 
     <div id="divLowerOut">
       <div id="divLowerIn">
-        <div id="divControls">
+        <div id="divControls" class="select-none">
           <span
             id="btnShuffle"
             class="cursor-pointer material-symbols-outlined color-grey"
