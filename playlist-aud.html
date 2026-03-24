@@ -177,14 +177,14 @@
           (async () => {
             const container = document.getElementById("container");
             const source = container.children[0];
-            const tblList = document.getElementById("tblList");
+            const tbody = document.getElementById("tblList").tBodies[0];
 
             this.currentItem = null;
 
             source.removeAttribute("src");
             container.load();
 
-            tblList.innerHTML = "";
+            tbody.innerHTML = "";
 
             if (path === "") {
               this.showModal("");
@@ -222,13 +222,13 @@
               `;
             }
 
-            tblList.innerHTML = tableHTML;
+            tbody.innerHTML = tableHTML;
 
             if (cfg.item >= 0) {
-              if (cfg.item >= tblList.rows.length)
+              if (cfg.item >= tbody.rows.length)
                 throw new Error("Invalid item index " + cfg.item);
 
-              tblList.rows[cfg.item].click();
+              tbody.rows[cfg.item].click();
             }
 
             this.showModal("");
@@ -241,14 +241,14 @@
         static trItem_onclick(elem) {
           const container = document.getElementById("container");
           const source = container.children[0];
-          const tblList = document.getElementById("tblList");
+          const tbody = document.getElementById("tblList").tBodies[0];
 
           this.currentItem = elem;
 
           source.src = elem.dataset.url;
           container.load();
 
-          for (const row of tblList.rows)
+          for (const row of tbody.rows)
             row.classList.toggle("font-bold", row === elem);
 
           // Warning: the following may fail if the user didn't interact with
@@ -267,29 +267,27 @@
         static btnPrevious_onclick() {
           const container = document.getElementById("container");
           const source = container.children[0];
-          const tblList = document.getElementById("tblList");
+          const tbody = document.getElementById("tblList").tBodies[0];
 
-          if (tblList.rows.length === 0) return;
+          if (tbody.rows.length === 0) return;
 
           if (this.shuffleEnabled) {
-            tblList.rows[
-              Math.floor(Math.random() * tblList.rows.length)
-            ].click();
+            tbody.rows[Math.floor(Math.random() * tbody.rows.length)].click();
             return;
           }
 
           if (this.currentItem === null) {
-            tblList.rows[0].click();
+            tbody.rows[0].click();
             return;
           }
 
           const prevIndex =
             (parseInt(this.currentItem.dataset.index, 10) +
-              tblList.rows.length -
+              tbody.rows.length -
               1) %
-            tblList.rows.length;
+            tbody.rows.length;
 
-          tblList.rows[prevIndex].click();
+          tbody.rows[prevIndex].click();
         }
 
         static btnPlayPause_onclick() {
@@ -302,25 +300,23 @@
         static btnNext_onclick() {
           const container = document.getElementById("container");
           const source = container.children[0];
-          const tblList = document.getElementById("tblList");
+          const tbody = document.getElementById("tblList").tBodies[0];
 
-          if (tblList.rows.length === 0) return;
+          if (tbody.rows.length === 0) return;
 
           if (this.shuffleEnabled) {
-            tblList.rows[
-              Math.floor(Math.random() * tblList.rows.length)
-            ].click();
+            tbody.rows[Math.floor(Math.random() * tbody.rows.length)].click();
             return;
           }
 
           if (this.currentItem === null) {
-            tblList.rows[0].click();
+            tbody.rows[0].click();
             return;
           }
 
           const nextIndex =
             (parseInt(this.currentItem.dataset.index, 10) + 1) %
-            tblList.rows.length;
+            tbody.rows.length;
 
           if (nextIndex === 0 && this.repeatMode === "off") {
             source.removeAttribute("src");
@@ -328,7 +324,7 @@
             return;
           }
 
-          tblList.rows[nextIndex].click();
+          tbody.rows[nextIndex].click();
         }
 
         static btnRepeat_onclick() {
@@ -421,7 +417,9 @@
 
     <div id="divUpperOut">
       <div id="divUpperIn">
-        <table id="tblList"></table>
+        <table id="tblList">
+          <tbody></tbody>
+        </table>
       </div>
     </div>
 
