@@ -272,6 +272,8 @@
           source.src = elem.dataset.url;
           container.load();
 
+          document.title = elem.title;
+
           for (const row of tbody.rows)
             row.classList.toggle("font-bold", row === elem);
 
