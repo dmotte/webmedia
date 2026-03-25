@@ -190,6 +190,7 @@
 
             this.currentItem = null;
 
+            container.currentTime = 0;
             source.removeAttribute("src");
             container.load();
 
@@ -287,6 +288,7 @@
 
           this.currentItem = elem;
 
+          container.currentTime = 0;
           source.src = elem.dataset.url;
           container.load();
 
@@ -354,6 +356,7 @@
             tbody.rows.length;
 
           if (nextIndex === 0 && this.repeatMode === "off") {
+            container.currentTime = 0;
             source.removeAttribute("src");
             container.load();
             return;
@@ -464,8 +467,8 @@
     <audio
       hidden
       id="container"
-      ontimeupdate="App.container_ontimeupdate()"
       onloadedmetadata="App.container_onloadedmetadata()"
+      ontimeupdate="App.container_ontimeupdate()"
       onended="App.container_onended()"
       onplay="App.container_onplay()"
       onpause="App.container_onpause()"
