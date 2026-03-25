@@ -203,7 +203,7 @@
         type="password"
         id="pswMain"
         placeholder="Password"
-        onkeypress="if (event.key === 'Enter') btnLoad.click();"
+        onkeydown="if (event.key === 'Enter') btnLoad.click();"
       />
       <input type="button" id="btnLoad" value="OK" onclick="App.loadHash()" />
     </div>
