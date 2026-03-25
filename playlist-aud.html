@@ -201,7 +201,7 @@
             const responseText = await response.text();
             const lines = responseText.split(/\r?\n/u);
 
-            let tableHTML = "";
+            let tbodyHTML = "";
             let itemTitle = "";
             let itemIndex = 0;
             for (const line of lines) {
@@ -213,7 +213,7 @@
                 continue;
               }
 
-              tableHTML += `
+              tbodyHTML += `
                 <tr class="cursor-pointer" title="${xmlescape(itemTitle)}"
                   data-index="${itemIndex++}" data-url="${xmlescape(line)}"
                   onclick="App.trItem_onclick(this)">
@@ -225,7 +225,7 @@
               `;
             }
 
-            tbody.innerHTML = tableHTML;
+            tbody.innerHTML = tbodyHTML;
 
             if (cfg.item >= 0) {
               if (cfg.item >= tbody.rows.length)
