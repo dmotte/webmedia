@@ -264,7 +264,7 @@
 
         static body_onkeydown(event) {
           const btnPlayPause = document.getElementById("btnPlayPause"),
-            btnPrevious = document.getElementById("btnPrevious"),
+            btnPrev = document.getElementById("btnPrev"),
             btnNext = document.getElementById("btnNext");
 
           switch (event.key) {
@@ -272,7 +272,7 @@
               btnPlayPause.click();
               break;
             case "ArrowLeft":
-              btnPrevious.click();
+              btnPrev.click();
               break;
             case "ArrowRight":
               btnNext.click();
@@ -308,7 +308,7 @@
           btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
         }
 
-        static btnPrevious_onclick() {
+        static btnPrev_onclick() {
           const container = document.getElementById("container");
           const tbody = document.getElementById("tblList").tBodies[0];
 
@@ -487,11 +487,11 @@
           &nbsp;
 
           <span
-            id="btnPrevious"
+            id="btnPrev"
             class="cursor-pointer material-symbols-outlined"
             title="Previous"
             style="font-size: 24px"
-            onclick="App.btnPrevious_onclick()"
+            onclick="App.btnPrev_onclick()"
             >skip_previous</span
           >
           <span
