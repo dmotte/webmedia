@@ -141,9 +141,8 @@
 
       class App {
         static showModal(id) {
-          document
-            .querySelectorAll(".modal")
-            .forEach((modal) => (modal.hidden = modal.id !== id));
+          for (const modal of document.querySelectorAll(".modal"))
+            modal.hidden = modal.id !== id;
         }
 
         static showMsg(msg) {
