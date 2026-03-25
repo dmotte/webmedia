@@ -171,6 +171,8 @@
 
         ////////////////////////////////////////////////////////////////////////
 
+        static playlistTitle = "";
+
         static shuffleEnabled = false;
         static repeatMode = "off"; // Possible values: "off", "all", "one"
 
@@ -218,11 +220,11 @@
                 }
 
                 if (line.startsWith("#PLAYLIST:")) {
-                  const playlistTitle = line.substring(10);
+                  this.playlistTitle = line.substring(10);
 
-                  document.title = playlistTitle;
+                  document.title = this.playlistTitle;
                   document.getElementById("titleMain").textContent =
-                    playlistTitle;
+                    this.playlistTitle;
 
                   continue;
                 }
