@@ -265,12 +265,20 @@
 
         static body_onkeydown(event) {
           const btnPlayPause = document.getElementById("btnPlayPause"),
+            btnPrev = document.getElementById("btnPrev"),
+            btnNext = document.getElementById("btnNext"),
             btnJumpBck = document.getElementById("btnJumpBck"),
             btnJumpFwd = document.getElementById("btnJumpFwd");
 
           switch (event.key) {
             case " ":
               btnPlayPause.click();
+              break;
+            case "ArrowUp":
+              btnPrev.click();
+              break;
+            case "ArrowDown":
+              btnNext.click();
               break;
             case "ArrowLeft":
               btnJumpBck.click();
