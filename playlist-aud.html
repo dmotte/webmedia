@@ -262,6 +262,24 @@
 
         ////////////////////////////////////////////////////////////////////////
 
+        static body_onkeydown(event) {
+          const btnPlayPause = document.getElementById("btnPlayPause"),
+            btnPrevious = document.getElementById("btnPrevious"),
+            btnNext = document.getElementById("btnNext");
+
+          switch (event.key) {
+            case " ":
+              btnPlayPause.click();
+              break;
+            case "ArrowLeft":
+              btnPrevious.click();
+              break;
+            case "ArrowRight":
+              btnNext.click();
+              break;
+          }
+        }
+
         static trItem_onclick(elem) {
           const container = document.getElementById("container");
           const source = container.children[0];
@@ -426,7 +444,11 @@
     </script>
   </head>
 
-  <body onload="App.loadHash()" onhashchange="App.loadHash()">
+  <body
+    onload="App.loadHash()"
+    onhashchange="App.loadHash()"
+    onkeydown="App.body_onkeydown(event)"
+  >
     <audio
       hidden
       id="container"
