@@ -300,12 +300,11 @@
           container.play();
         }
 
-        static btnShuffle_onclick() {
-          const btnShuffle = document.getElementById("btnShuffle");
+        static btnPlayPause_onclick() {
+          const container = document.getElementById("container");
 
-          this.shuffleEnabled = !this.shuffleEnabled;
-
-          btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
+          if (container.paused) container.play();
+          else container.pause();
         }
 
         static btnPrev_onclick() {
@@ -331,13 +330,6 @@
             tbody.rows.length;
 
           tbody.rows[prevIndex].click();
-        }
-
-        static btnPlayPause_onclick() {
-          const container = document.getElementById("container");
-
-          if (container.paused) container.play();
-          else container.pause();
         }
 
         static btnNext_onclick() {
@@ -370,6 +362,14 @@
           tbody.rows[nextIndex].click();
         }
 
+        static btnShuffle_onclick() {
+          const btnShuffle = document.getElementById("btnShuffle");
+
+          this.shuffleEnabled = !this.shuffleEnabled;
+
+          btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
+        }
+
         static btnRepeat_onclick() {
           const btnRepeat = document.getElementById("btnRepeat");
 
@@ -394,17 +394,17 @@
           }
         }
 
-        static btnJumpBck_onclick() {
-          const container = document.getElementById("container");
-
-          container.currentTime -= 10;
-        }
-
         static rangeSeek_oninput() {
           const container = document.getElementById("container"),
             rangeSeek = document.getElementById("rangeSeek");
 
           container.currentTime = parseFloat(rangeSeek.value);
+        }
+
+        static btnJumpBck_onclick() {
+          const container = document.getElementById("container");
+
+          container.currentTime -= 10;
         }
 
         static btnJumpFwd_onclick() {
