@@ -169,10 +169,14 @@
           return [path, cfg];
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         static shuffleEnabled = false;
         static repeatMode = "off"; // Possible values: "off", "all", "one"
 
         static currentItem = null;
+
+        ////////////////////////////////////////////////////////////////////////
 
         static loadHash() {
           const [path, cfg] = this.parseHash();
@@ -251,6 +255,8 @@
             this.showMsg(error);
           });
         }
+
+        ////////////////////////////////////////////////////////////////////////
 
         static trItem_onclick(elem) {
           const container = document.getElementById("container");
