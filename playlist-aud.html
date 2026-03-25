@@ -264,18 +264,18 @@
 
         static body_onkeydown(event) {
           const btnPlayPause = document.getElementById("btnPlayPause"),
-            btnPrev = document.getElementById("btnPrev"),
-            btnNext = document.getElementById("btnNext");
+            btnJumpBck = document.getElementById("btnJumpBck"),
+            btnJumpFwd = document.getElementById("btnJumpFwd");
 
           switch (event.key) {
             case " ":
               btnPlayPause.click();
               break;
             case "ArrowLeft":
-              btnPrev.click();
+              btnJumpBck.click();
               break;
             case "ArrowRight":
-              btnNext.click();
+              btnJumpFwd.click();
               break;
           }
         }
@@ -394,11 +394,23 @@
           }
         }
 
+        static btnJumpBck_onclick() {
+          const container = document.getElementById("container");
+
+          container.currentTime -= 10;
+        }
+
         static rangeSeek_oninput() {
           const container = document.getElementById("container"),
             rangeSeek = document.getElementById("rangeSeek");
 
           container.currentTime = parseFloat(rangeSeek.value);
+        }
+
+        static btnJumpFwd_onclick() {
+          const container = document.getElementById("container");
+
+          container.currentTime += 10;
         }
 
         static container_onloadedmetadata() {
@@ -523,8 +535,18 @@
           >
         </div>
 
-        <div id="divSeek">
+        <div id="divSeek" class="select-none">
           <span id="spanTimeCurrent" class="font-monospace">00:00</span>
+
+          <span
+            id="btnJumpBck"
+            class="cursor-pointer material-symbols-outlined"
+            title="Jump back 10 seconds"
+            style="font-size: 24px"
+            onclick="App.btnJumpBck_onclick()"
+            >replay_10</span
+          >
+
           <input
             type="range"
             id="rangeSeek"
@@ -536,6 +558,16 @@
             style="flex: 1"
             oninput="App.rangeSeek_oninput()"
           />
+
+          <span
+            id="btnJumpFwd"
+            class="cursor-pointer material-symbols-outlined"
+            title="Jump forward 10 seconds"
+            style="font-size: 24px"
+            onclick="App.btnJumpFwd_onclick()"
+            >forward_10</span
+          >
+
           <span id="spanTimeDuration" class="font-monospace">--:--</span>
         </div>
       </div>
