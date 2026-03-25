@@ -208,9 +208,20 @@
               if (line === "") continue;
 
               if (line.startsWith("#")) {
-                if (line.startsWith("#EXTINF:")) itemTitle = line.split(",")[1];
+                if (line.startsWith("#EXTINF:")) {
+                  itemTitle = line.split(",").slice(1).join(",");
+                  continue;
+                }
 
-                continue;
+                if (line.startsWith("#PLAYLIST:")) {
+                  const playlistTitle = line.substring(10);
+
+                  document.title = playlistTitle;
+                  document.getElementById("titleMain").textContent =
+                    playlistTitle;
+
+                  continue;
+                }
               }
 
               tbodyHTML += `
@@ -420,6 +431,8 @@
 
     <div id="divUpperOut">
       <div id="divUpperIn">
+        <h1 id="titleMain">Audio playlist player</h1>
+
         <table id="tblList">
           <tbody></tbody>
         </table>
