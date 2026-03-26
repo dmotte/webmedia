@@ -334,6 +334,11 @@
 
           if (tbody.rows.length === 0) return;
 
+          if (container.currentTime > 3) {
+            container.currentTime = 0;
+            return;
+          }
+
           if (this.shuffleEnabled) {
             tbody.rows[Math.floor(Math.random() * tbody.rows.length)].click();
             return;
