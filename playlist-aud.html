@@ -98,7 +98,9 @@
       #divLower1 {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
       }
       #divLower2 {
         display: flex;
@@ -106,10 +108,13 @@
         gap: 10px;
       }
 
-      #divControls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+      #spanTimeCurrent {
+        position: absolute;
+        left: 0;
+      }
+      #spanTimeDuration {
+        position: absolute;
+        right: 0;
       }
     </style>
 
@@ -510,54 +515,52 @@
             >00:00</span
           >
 
-          <div id="divControls" class="select-none">
-            <span
-              id="btnShuffle"
-              class="cursor-pointer material-symbols-outlined color-grey"
-              title="Shuffle"
-              style="font-size: 16px"
-              onclick="App.btnShuffle_onclick()"
-              >shuffle</span
-            >
+          <span
+            id="btnShuffle"
+            class="cursor-pointer select-none material-symbols-outlined color-grey"
+            title="Shuffle"
+            style="font-size: 16px"
+            onclick="App.btnShuffle_onclick()"
+            >shuffle</span
+          >
 
-            &nbsp;
+          &nbsp;
 
-            <span
-              id="btnPrev"
-              class="cursor-pointer material-symbols-outlined"
-              title="Previous"
-              style="font-size: 24px"
-              onclick="App.btnPrev_onclick()"
-              >skip_previous</span
-            >
-            <span
-              id="btnPlayPause"
-              class="cursor-pointer material-symbols-outlined"
-              title="Play"
-              style="font-size: 40px"
-              onclick="App.btnPlayPause_onclick()"
-              >play_arrow</span
-            >
-            <span
-              id="btnNext"
-              class="cursor-pointer material-symbols-outlined"
-              title="Next"
-              style="font-size: 24px"
-              onclick="App.btnNext_onclick()"
-              >skip_next</span
-            >
+          <span
+            id="btnPrev"
+            class="cursor-pointer select-none material-symbols-outlined"
+            title="Previous"
+            style="font-size: 24px"
+            onclick="App.btnPrev_onclick()"
+            >skip_previous</span
+          >
+          <span
+            id="btnPlayPause"
+            class="cursor-pointer select-none material-symbols-outlined"
+            title="Play"
+            style="font-size: 40px"
+            onclick="App.btnPlayPause_onclick()"
+            >play_arrow</span
+          >
+          <span
+            id="btnNext"
+            class="cursor-pointer select-none material-symbols-outlined"
+            title="Next"
+            style="font-size: 24px"
+            onclick="App.btnNext_onclick()"
+            >skip_next</span
+          >
 
-            &nbsp;
+          &nbsp;
 
-            <span
-              id="btnRepeat"
-              class="cursor-pointer material-symbols-outlined color-grey"
-              title="Repeat mode"
-              style="font-size: 16px"
-              onclick="App.btnRepeat_onclick()"
-              >repeat</span
-            >
-          </div>
+          <span
+            id="btnRepeat"
+            class="cursor-pointer select-none material-symbols-outlined color-grey"
+            title="Repeat mode"
+            style="font-size: 16px"
+            onclick="App.btnRepeat_onclick()"
+            >repeat</span
+          >
 
           <span
             id="spanTimeDuration"
