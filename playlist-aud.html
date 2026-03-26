@@ -329,6 +329,7 @@
 
         static btnPrev_onclick() {
           const container = document.getElementById("container");
+          const source = container.children[0];
           const tbody = document.getElementById("tblList").tBodies[0];
 
           if (tbody.rows.length === 0) return;
@@ -348,6 +349,19 @@
               tbody.rows.length -
               1) %
             tbody.rows.length;
+
+          if (
+            prevIndex === tbody.rows.length - 1 &&
+            this.repeatMode !== "all"
+          ) {
+            this.currentItem = null;
+
+            container.currentTime = 0;
+            source.removeAttribute("src");
+            container.load();
+
+            return;
+          }
 
           tbody.rows[prevIndex].click();
         }
@@ -373,10 +387,13 @@
             (parseInt(this.currentItem.dataset.index, 10) + 1) %
             tbody.rows.length;
 
-          if (nextIndex === 0 && this.repeatMode === "off") {
+          if (nextIndex === 0 && this.repeatMode !== "all") {
+            this.currentItem = null;
+
             container.currentTime = 0;
             source.removeAttribute("src");
             container.load();
+
             return;
           }
 
