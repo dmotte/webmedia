@@ -95,13 +95,18 @@
         margin: 10px;
       }
 
-      #divControls {
+      #divLower1 {
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
+      }
+      #divLower2 {
+        display: flex;
+        align-items: center;
         gap: 10px;
       }
-      #divSeek {
+
+      #divControls {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -497,58 +502,72 @@
 
     <div id="divLowerOut">
       <div id="divLowerIn">
-        <div id="divControls" class="select-none">
+        <div id="divLower1">
           <span
-            id="btnShuffle"
-            class="cursor-pointer material-symbols-outlined color-grey"
-            title="Shuffle"
-            style="font-size: 16px"
-            onclick="App.btnShuffle_onclick()"
-            >shuffle</span
+            id="spanTimeCurrent"
+            class="font-monospace"
+            title="Current playback time"
+            >00:00</span
           >
 
-          &nbsp;
+          <div id="divControls" class="select-none">
+            <span
+              id="btnShuffle"
+              class="cursor-pointer material-symbols-outlined color-grey"
+              title="Shuffle"
+              style="font-size: 16px"
+              onclick="App.btnShuffle_onclick()"
+              >shuffle</span
+            >
+
+            &nbsp;
+
+            <span
+              id="btnPrev"
+              class="cursor-pointer material-symbols-outlined"
+              title="Previous"
+              style="font-size: 24px"
+              onclick="App.btnPrev_onclick()"
+              >skip_previous</span
+            >
+            <span
+              id="btnPlayPause"
+              class="cursor-pointer material-symbols-outlined"
+              title="Play"
+              style="font-size: 40px"
+              onclick="App.btnPlayPause_onclick()"
+              >play_arrow</span
+            >
+            <span
+              id="btnNext"
+              class="cursor-pointer material-symbols-outlined"
+              title="Next"
+              style="font-size: 24px"
+              onclick="App.btnNext_onclick()"
+              >skip_next</span
+            >
+
+            &nbsp;
+
+            <span
+              id="btnRepeat"
+              class="cursor-pointer material-symbols-outlined color-grey"
+              title="Repeat mode"
+              style="font-size: 16px"
+              onclick="App.btnRepeat_onclick()"
+              >repeat</span
+            >
+          </div>
 
           <span
-            id="btnPrev"
-            class="cursor-pointer material-symbols-outlined"
-            title="Previous"
-            style="font-size: 24px"
-            onclick="App.btnPrev_onclick()"
-            >skip_previous</span
-          >
-          <span
-            id="btnPlayPause"
-            class="cursor-pointer material-symbols-outlined"
-            title="Play"
-            style="font-size: 40px"
-            onclick="App.btnPlayPause_onclick()"
-            >play_arrow</span
-          >
-          <span
-            id="btnNext"
-            class="cursor-pointer material-symbols-outlined"
-            title="Next"
-            style="font-size: 24px"
-            onclick="App.btnNext_onclick()"
-            >skip_next</span
-          >
-
-          &nbsp;
-
-          <span
-            id="btnRepeat"
-            class="cursor-pointer material-symbols-outlined color-grey"
-            title="Repeat mode"
-            style="font-size: 16px"
-            onclick="App.btnRepeat_onclick()"
-            >repeat</span
+            id="spanTimeDuration"
+            class="font-monospace"
+            title="Total duration"
+            >--:--</span
           >
         </div>
 
-        <div id="divSeek" class="select-none">
-          <span id="spanTimeCurrent" class="font-monospace">00:00</span>
-
+        <div id="divLower2" class="select-none">
           <span
             id="btnJumpBck"
             class="cursor-pointer material-symbols-outlined"
@@ -578,8 +597,6 @@
             onclick="App.btnJumpFwd_onclick()"
             >forward_10</span
           >
-
-          <span id="spanTimeDuration" class="font-monospace">--:--</span>
         </div>
       </div>
     </div>
