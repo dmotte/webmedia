@@ -190,6 +190,18 @@
 
         ////////////////////////////////////////////////////////////////////////
 
+        static setupMediaSession() {
+          if (!("mediaSession" in navigator)) return;
+
+          navigator.mediaSession.setActionHandler("previoustrack", () => {
+            document.getElementById("btnPrev").click();
+          });
+
+          navigator.mediaSession.setActionHandler("nexttrack", () => {
+            document.getElementById("btnNext").click();
+          });
+        }
+
         static loadHash() {
           const [path, cfg] = this.parseHash();
 
@@ -269,6 +281,11 @@
             console.error(error);
             this.showMsg(error);
           });
+        }
+
+        static load() {
+          this.setupMediaSession();
+          this.loadHash();
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -500,7 +517,7 @@
   </head>
 
   <body
-    onload="App.loadHash()"
+    onload="App.load()"
     onhashchange="App.loadHash()"
     onkeydown="App.body_onkeydown(event)"
   >
