@@ -120,6 +120,103 @@
 
     <script type="text/javascript">
       // Src: https://github.com/dmotte/misc/tree/main/snippets
+      /** Fisher-Yates (Knuth) shuffle algorithm */
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      // TODO use this class
+      class MediaQueue {
+        constructor(items, currentIndex = 0) {
+          if (items.length < 0) throw new Error("The list is empty");
+
+          this.items = items;
+
+          this.setCurrent(currentIndex);
+
+          this.setupShuffle();
+        }
+
+        /** Initializes (or re-initializes) the shuffle maps */
+        setupShuffle() {
+          const len = this.items.length;
+
+          this.mapShufPrev = new Array(len);
+          this.mapShufNext = new Array(len);
+
+          // Build a single-cycle permutation of the items in mapShufNext,
+          // and its inverse permutation in mapShufPrev
+
+          const shuf = shuffle([...Array(len).keys()]);
+
+          for (let i = 0; i < len - 1; i++) {
+            this.mapShufNext[shuf[i]] = shuf[i + 1];
+            this.mapShufPrev[shuf[i + 1]] = shuf[i];
+          }
+          this.mapShufNext[shuf[len - 1]] = shuf[0];
+          this.mapShufPrev[shuf[0]] = shuf[len - 1];
+        }
+
+        getItems() {
+          return this.items;
+        }
+        getLength() {
+          return this.items.length;
+        }
+        getItem(index) {
+          return this.items[index];
+        }
+
+        getCurrentIndex() {
+          return this.currentIndex;
+        }
+        getCurrentItem() {
+          return this.items[this.currentIndex];
+        }
+
+        setCurrent(index) {
+          if (index < 0) throw new Error("Index cannot be < 0");
+          if (index >= this.items.length)
+            throw new Error("Index cannot be >= number of items");
+
+          this.currentIndex = index;
+        }
+
+        prev(shuffle = false, loop = false) {
+          if (shuffle) {
+            this.currentIndex = this.mapShufPrev[this.currentIndex];
+            return [this.currentIndex, true];
+          }
+
+          const len = this.items.length;
+
+          if (!loop && this.currentIndex === 0)
+            return [this.currentIndex, false];
+
+          this.currentIndex = (this.currentIndex + len - 1) % len;
+          return [this.currentIndex, true];
+        }
+        next(shuffle = false, loop = false) {
+          if (shuffle) {
+            this.currentIndex = this.mapShufNext[this.currentIndex];
+            return [this.currentIndex, true];
+          }
+
+          const len = this.items.length;
+
+          if (!loop && this.currentIndex === len - 1)
+            return [this.currentIndex, false];
+
+          this.currentIndex = (this.currentIndex + 1) % len;
+          return [this.currentIndex, true];
+        }
+      }
+
+      // Src: https://github.com/dmotte/misc/tree/main/snippets
       function xmlescape(x) {
         return x
           .replaceAll("&", "&amp;")
