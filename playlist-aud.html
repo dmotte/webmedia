@@ -271,6 +271,10 @@
 
           const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
+          cfg.shuffle = cfg.shuffle === "y";
+
+          if (!["off", "all", "one"].includes(cfg.repeat)) cfg.repeat = "off";
+
           cfg.item = parseInt(cfg.item ?? "-1", 10);
 
           cfg.play = "play" in cfg;
@@ -327,6 +331,28 @@
             );
 
           if (play) container.play();
+        }
+
+        static setShuffleEnabled(x) {
+          this.shuffleEnabled = x;
+
+          // If we just disabled the shuffle mode, re-initialize the
+          // shuffle maps for the next time
+          if (!this.shuffleEnabled) this.mediaQueue.setupShuffle();
+
+          const btnShuffle = document.getElementById("btnShuffle");
+          btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
+        }
+
+        static setRepeatMode(x) {
+          if (!["off", "all", "one"].includes(x))
+            throw new Error("Invalid repeat mode " + x);
+
+          this.repeatMode = x;
+
+          const btnRepeat = document.getElementById("btnRepeat");
+          btnRepeat.textContent = x === "one" ? "repeat_one" : "repeat";
+          btnRepeat.classList.toggle("color-grey", x === "off");
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -414,12 +440,15 @@
 
             tbody.innerHTML = tbodyHTML;
 
-            this.showModal("");
+            this.setShuffleEnabled(cfg.shuffle);
+            this.setRepeatMode(cfg.repeat);
 
             if (cfg.item >= 0) {
               this.mediaQueue.setCurrent(cfg.item);
               this.loadCurrentItem(cfg.play);
             }
+
+            this.showModal("");
           })().catch((error) => {
             console.error(error);
             this.showMsg(error);
@@ -505,39 +534,13 @@
         }
 
         static btnShuffle_onclick() {
-          this.shuffleEnabled = !this.shuffleEnabled;
-
-          // If we just disabled the shuffle mode, re-initialize the
-          // shuffle maps for the next time
-          if (!this.shuffleEnabled) this.mediaQueue.setupShuffle();
-
-          document
-            .getElementById("btnShuffle")
-            .classList.toggle("color-grey", !this.shuffleEnabled);
+          this.setShuffleEnabled(!this.shuffleEnabled);
         }
 
         static btnRepeat_onclick() {
-          const btnRepeat = document.getElementById("btnRepeat");
-
-          switch (this.repeatMode) {
-            case "off":
-              this.repeatMode = "all";
-              btnRepeat.textContent = "repeat";
-              btnRepeat.classList.remove("color-grey");
-              break;
-            case "all":
-              this.repeatMode = "one";
-              btnRepeat.textContent = "repeat_one";
-              btnRepeat.classList.remove("color-grey");
-              break;
-            case "one":
-              this.repeatMode = "off";
-              btnRepeat.textContent = "repeat";
-              btnRepeat.classList.add("color-grey");
-              break;
-            default:
-              throw new Error("Invalid repeat mode " + this.repeatMode);
-          }
+          this.setRepeatMode(
+            { off: "all", all: "one", one: "off" }[this.repeatMode],
+          );
         }
 
         static rangeSeek_oninput() {
