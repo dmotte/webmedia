@@ -289,6 +289,48 @@
 
         ////////////////////////////////////////////////////////////////////////
 
+        static loadCurrentItem(play = false) {
+          const container = document.getElementById("container");
+          const source = container.children[0];
+          const tbody = document.getElementById("tblList").tBodies[0];
+
+          const currentItem = this.mediaQueue?.getCurrentItem() ?? null;
+
+          if (currentItem === null) {
+            container.currentTime = 0;
+            source.removeAttribute("src");
+            container.load();
+
+            const btnPlayPause = document.getElementById("btnPlayPause");
+            btnPlayPause.textContent = "play_arrow";
+            btnPlayPause.title = "Play";
+
+            document.getElementById("rangeSeek").max = 0;
+            document.getElementById("spanTimeDuration").textContent = "--:--";
+
+            for (const row of tbody.rows) row.classList.remove("font-bold");
+
+            return;
+          }
+
+          container.currentTime = 0;
+          source.src = currentItem.url;
+          container.load();
+
+          document.title = currentItem.title;
+
+          const strCurrentIndex = String(this.mediaQueue.getCurrentIndex());
+          for (const row of tbody.rows)
+            row.classList.toggle(
+              "font-bold",
+              row.dataset.index === strCurrentIndex,
+            );
+
+          if (play) container.play();
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
         static setupMediaSession() {
           if (!("mediaSession" in navigator)) return;
 
@@ -309,13 +351,10 @@
             const source = container.children[0];
             const tbody = document.getElementById("tblList").tBodies[0];
 
-            this.mediaQueue = null;
-
-            container.currentTime = 0;
-            source.removeAttribute("src");
-            container.load();
-
             tbody.innerHTML = "";
+
+            this.mediaQueue = null;
+            this.loadCurrentItem();
 
             if (path === "") {
               this.showModal("");
@@ -371,16 +410,16 @@
               itemIndex++;
             }
 
-            this.mediaQueue = new MediaQueue(
-              items,
-              cfg.item < 0 ? null : cfg.item,
-            );
+            this.mediaQueue = new MediaQueue(items);
 
             tbody.innerHTML = tbodyHTML;
 
             this.showModal("");
 
-            if (cfg.play) container.play();
+            if (cfg.item >= 0) {
+              this.mediaQueue.setCurrent(cfg.item);
+              this.loadCurrentItem(cfg.play);
+            }
           })().catch((error) => {
             console.error(error);
             this.showMsg(error);
@@ -421,26 +460,17 @@
         }
 
         static trItem_onclick(elem) {
-          const container = document.getElementById("container");
-          const source = container.children[0];
-          const tbody = document.getElementById("tblList").tBodies[0];
-
           this.mediaQueue.setCurrent(parseInt(elem.dataset.index, 10));
-          const currentItem = this.mediaQueue.getCurrentItem();
-
-          container.currentTime = 0;
-          source.src = currentItem.url;
-          container.load();
-
-          document.title = currentItem.title;
-
-          for (const row of tbody.rows)
-            row.classList.toggle("font-bold", row === elem);
-
-          container.play();
+          this.loadCurrentItem(true);
         }
 
         static btnPlayPause_onclick() {
+          if (this.mediaQueue.getCurrentIndex() === null) {
+            this.mediaQueue.setCurrent(0);
+            this.loadCurrentItem(true);
+            return;
+          }
+
           const container = document.getElementById("container");
 
           if (container.paused) container.play();
@@ -449,63 +479,41 @@
 
         static btnPrev_onclick() {
           const container = document.getElementById("container");
-          const source = container.children[0];
-          const tbody = document.getElementById("tblList").tBodies[0];
-
-          if (tbody.rows.length === 0) return;
 
           if (container.currentTime > 3) {
             container.currentTime = 0;
             return;
           }
 
-          const newIndex = this.mediaQueue.getPrevIndex(
-            this.shuffleEnabled,
-            this.repeatMode === "all",
+          this.mediaQueue.setCurrent(
+            this.mediaQueue.getPrevIndex(
+              this.shuffleEnabled,
+              this.repeatMode === "all",
+            ),
           );
-
-          if (newIndex === null) {
-            container.currentTime = 0;
-            source.removeAttribute("src");
-            container.load();
-
-            return;
-          }
-
-          tbody.rows[newIndex].click();
+          this.loadCurrentItem(true);
         }
 
         static btnNext_onclick() {
-          const container = document.getElementById("container");
-          const source = container.children[0];
-          const tbody = document.getElementById("tblList").tBodies[0];
-
-          if (tbody.rows.length === 0) return;
-
-          const newIndex = this.mediaQueue.getNextIndex(
-            this.shuffleEnabled,
-            this.repeatMode === "all",
+          this.mediaQueue.setCurrent(
+            this.mediaQueue.getNextIndex(
+              this.shuffleEnabled,
+              this.repeatMode === "all",
+            ),
           );
-
-          if (newIndex === null) {
-            container.currentTime = 0;
-            source.removeAttribute("src");
-            container.load();
-
-            return;
-          }
-
-          tbody.rows[newIndex].click();
+          this.loadCurrentItem(true);
         }
 
         static btnShuffle_onclick() {
-          const btnShuffle = document.getElementById("btnShuffle");
-
           this.shuffleEnabled = !this.shuffleEnabled;
 
-          if (this.shuffleEnabled) this.mediaQueue.setupShuffle();
+          // If we just disabled the shuffle mode, re-initialize the
+          // shuffle maps for the next time
+          if (!this.shuffleEnabled) this.mediaQueue.setupShuffle();
 
-          btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
+          document
+            .getElementById("btnShuffle")
+            .classList.toggle("color-grey", !this.shuffleEnabled);
         }
 
         static btnRepeat_onclick() {
