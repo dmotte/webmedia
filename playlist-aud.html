@@ -129,7 +129,6 @@
         return arr;
       }
 
-      // TODO use this class
       class MediaQueue {
         constructor(items, currentIndex = 0) {
           if (items.length < 0) throw new Error("The list is empty");
@@ -263,6 +262,8 @@
 
           cfg.item = parseInt(cfg.item ?? "-1", 10);
 
+          cfg.play = "play" in cfg;
+
           return [path, cfg];
         }
 
@@ -270,10 +271,10 @@
 
         static playlistTitle = "";
 
+        static mediaQueue = null;
+
         static shuffleEnabled = false;
         static repeatMode = "off"; // Possible values: "off", "all", "one"
-
-        static currentItem = null;
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -297,7 +298,7 @@
             const source = container.children[0];
             const tbody = document.getElementById("tblList").tBodies[0];
 
-            this.currentItem = null;
+            this.mediaQueue = null;
 
             container.currentTime = 0;
             source.removeAttribute("src");
@@ -317,6 +318,7 @@
             const responseText = await response.text();
             const lines = responseText.split(/\r?\n/u);
 
+            let items = [];
             let tbodyHTML = "";
             let itemTitle = "";
             let itemIndex = 0;
@@ -342,9 +344,11 @@
                 continue;
               }
 
+              items.push({ title: itemTitle, url: line });
+
               tbodyHTML += `
                 <tr class="cursor-pointer" title="${xmlescape(itemTitle)}"
-                  data-index="${itemIndex++}" data-url="${xmlescape(line)}"
+                  data-index="${itemIndex}"
                   onclick="App.trItem_onclick(this)">
                   <td>
                     <span class="material-symbols-outlined">music_note</span>
@@ -352,18 +356,17 @@
                   <td>${xmlescape(itemTitle)}</td>
                 </tr>
               `;
+
+              itemIndex++;
             }
+
+            this.mediaQueue = new MediaQueue(items, Math.max(cfg.item, 0));
 
             tbody.innerHTML = tbodyHTML;
 
-            if (cfg.item >= 0) {
-              if (cfg.item >= tbody.rows.length)
-                throw new Error("Invalid item index " + cfg.item);
-
-              tbody.rows[cfg.item].click();
-            }
-
             this.showModal("");
+
+            if (cfg.play) container.play();
           })().catch((error) => {
             console.error(error);
             this.showMsg(error);
@@ -408,19 +411,18 @@
           const source = container.children[0];
           const tbody = document.getElementById("tblList").tBodies[0];
 
-          this.currentItem = elem;
+          this.mediaQueue.setCurrent(parseInt(elem.dataset.index, 10));
+          const currentItem = this.mediaQueue.getCurrentItem();
 
           container.currentTime = 0;
-          source.src = elem.dataset.url;
+          source.src = currentItem.url;
           container.load();
 
-          document.title = elem.title;
+          document.title = currentItem.title;
 
           for (const row of tbody.rows)
             row.classList.toggle("font-bold", row === elem);
 
-          // Warning: the following may fail if the user didn't interact with
-          // the document first
           container.play();
         }
 
@@ -443,28 +445,12 @@
             return;
           }
 
-          if (this.shuffleEnabled) {
-            tbody.rows[Math.floor(Math.random() * tbody.rows.length)].click();
-            return;
-          }
+          const newIndex = this.mediaQueue.getPrevIndex(
+            this.shuffleEnabled,
+            this.repeatMode === "all",
+          );
 
-          if (this.currentItem === null) {
-            tbody.rows[0].click();
-            return;
-          }
-
-          const prevIndex =
-            (parseInt(this.currentItem.dataset.index, 10) +
-              tbody.rows.length -
-              1) %
-            tbody.rows.length;
-
-          if (
-            prevIndex === tbody.rows.length - 1 &&
-            this.repeatMode !== "all"
-          ) {
-            this.currentItem = null;
-
+          if (newIndex === null) {
             container.currentTime = 0;
             source.removeAttribute("src");
             container.load();
@@ -472,7 +458,7 @@
             return;
           }
 
-          tbody.rows[prevIndex].click();
+          tbody.rows[newIndex].click();
         }
 
         static btnNext_onclick() {
@@ -482,23 +468,12 @@
 
           if (tbody.rows.length === 0) return;
 
-          if (this.shuffleEnabled) {
-            tbody.rows[Math.floor(Math.random() * tbody.rows.length)].click();
-            return;
-          }
+          const newIndex = this.mediaQueue.getNextIndex(
+            this.shuffleEnabled,
+            this.repeatMode === "all",
+          );
 
-          if (this.currentItem === null) {
-            tbody.rows[0].click();
-            return;
-          }
-
-          const nextIndex =
-            (parseInt(this.currentItem.dataset.index, 10) + 1) %
-            tbody.rows.length;
-
-          if (nextIndex === 0 && this.repeatMode !== "all") {
-            this.currentItem = null;
-
+          if (newIndex === null) {
             container.currentTime = 0;
             source.removeAttribute("src");
             container.load();
@@ -506,7 +481,7 @@
             return;
           }
 
-          tbody.rows[nextIndex].click();
+          tbody.rows[newIndex].click();
         }
 
         static btnShuffle_onclick() {
