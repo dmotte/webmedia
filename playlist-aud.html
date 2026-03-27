@@ -186,33 +186,23 @@
           this.currentIndex = index;
         }
 
-        prev(shuffle = false, loop = false) {
-          if (shuffle) {
-            this.currentIndex = this.mapShufPrev[this.currentIndex];
-            return [this.currentIndex, true];
-          }
+        getPrevIndex(shuffle = false, loop = false) {
+          if (shuffle) return this.mapShufPrev[this.currentIndex];
 
           const len = this.items.length;
 
-          if (!loop && this.currentIndex === 0)
-            return [this.currentIndex, false];
+          if (!loop && this.currentIndex === 0) return null;
 
-          this.currentIndex = (this.currentIndex + len - 1) % len;
-          return [this.currentIndex, true];
+          return (this.currentIndex + len - 1) % len;
         }
-        next(shuffle = false, loop = false) {
-          if (shuffle) {
-            this.currentIndex = this.mapShufNext[this.currentIndex];
-            return [this.currentIndex, true];
-          }
+        getNextIndex(shuffle = false, loop = false) {
+          if (shuffle) return this.mapShufNext[this.currentIndex];
 
           const len = this.items.length;
 
-          if (!loop && this.currentIndex === len - 1)
-            return [this.currentIndex, false];
+          if (!loop && this.currentIndex === len - 1) return null;
 
-          this.currentIndex = (this.currentIndex + 1) % len;
-          return [this.currentIndex, true];
+          return (this.currentIndex + 1) % len;
         }
       }
 
