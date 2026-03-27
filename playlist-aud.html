@@ -489,6 +489,8 @@
 
           this.shuffleEnabled = !this.shuffleEnabled;
 
+          if (this.shuffleEnabled) this.mediaQueue.setupShuffle();
+
           btnShuffle.classList.toggle("color-grey", !this.shuffleEnabled);
         }
 
