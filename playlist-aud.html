@@ -130,7 +130,7 @@
       }
 
       class MediaQueue {
-        constructor(items, currentIndex = 0) {
+        constructor(items, currentIndex = null) {
           if (items.length < 0) throw new Error("The list is empty");
 
           this.items = items;
@@ -174,10 +174,17 @@
           return this.currentIndex;
         }
         getCurrentItem() {
+          if (this.currentIndex === null) return null;
+
           return this.items[this.currentIndex];
         }
 
         setCurrent(index) {
+          if (index === null) {
+            this.currentIndex = null;
+            return;
+          }
+
           if (index < 0) throw new Error("Index cannot be < 0");
           if (index >= this.items.length)
             throw new Error("Index cannot be >= number of items");
@@ -186,6 +193,8 @@
         }
 
         getPrevIndex(shuffle = false, loop = false) {
+          if (this.currentIndex === null) return null;
+
           if (shuffle) return this.mapShufPrev[this.currentIndex];
 
           const len = this.items.length;
@@ -195,6 +204,8 @@
           return (this.currentIndex + len - 1) % len;
         }
         getNextIndex(shuffle = false, loop = false) {
+          if (this.currentIndex === null) return null;
+
           if (shuffle) return this.mapShufNext[this.currentIndex];
 
           const len = this.items.length;
@@ -360,7 +371,10 @@
               itemIndex++;
             }
 
-            this.mediaQueue = new MediaQueue(items, Math.max(cfg.item, 0));
+            this.mediaQueue = new MediaQueue(
+              items,
+              cfg.item < 0 ? null : cfg.item,
+            );
 
             tbody.innerHTML = tbodyHTML;
 
