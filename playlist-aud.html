@@ -254,6 +254,8 @@
           this.showModal("modalMsg");
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         static parseHash(hash = "") {
           if (hash === "") hash = window.location.hash;
           if (hash.startsWith("#")) hash = hash.substring(1);
@@ -269,11 +271,9 @@
           const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
           cfg.shuffle = cfg.shuffle === "y";
-
           if (!["off", "all", "one"].includes(cfg.repeat)) cfg.repeat = "off";
 
           cfg.item = parseInt(cfg.item ?? "-1", 10);
-
           cfg.play = "play" in cfg;
 
           return [path, cfg];
@@ -301,6 +301,8 @@
             container.currentTime = 0;
             source.removeAttribute("src");
             container.load();
+
+            document.title = this.playlistTitle;
 
             const btnPlayPause = document.getElementById("btnPlayPause");
             btnPlayPause.textContent = "play_arrow";
