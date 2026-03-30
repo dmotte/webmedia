@@ -256,6 +256,36 @@
 
         ////////////////////////////////////////////////////////////////////////
 
+        static parseM3UPlaylist(text = "") {
+          let playlistTitle = "",
+            items = [];
+
+          let itemTitle = "";
+          for (const line of text.split(/\r?\n/u)) {
+            if (line === "") continue;
+
+            if (line.startsWith("#")) {
+              if (line.startsWith("#EXTINF:")) {
+                itemTitle = line.split(",").slice(1).join(",");
+                continue;
+              }
+
+              if (line.startsWith("#PLAYLIST:")) {
+                playlistTitle = line.substring(10);
+                continue;
+              }
+
+              continue;
+            }
+
+            items.push({ title: itemTitle, url: line });
+          }
+
+          return [playlistTitle, items];
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
         static parseHash(hash = "") {
           if (hash === "") hash = window.location.hash;
           if (hash.startsWith("#")) hash = hash.substring(1);
@@ -281,7 +311,7 @@
 
         ////////////////////////////////////////////////////////////////////////
 
-        static playlistTitle = "";
+        static playlistTitle = "Audio playlist player";
 
         static mediaQueue = null;
 
@@ -391,52 +421,30 @@
             const response = await fetch(path);
             if (!response.ok) throw new Error("HTTP error " + response.status);
             const responseText = await response.text();
-            const lines = responseText.split(/\r?\n/u);
+            let [playlistTitle, items] = this.parseM3UPlaylist(responseText);
 
-            let items = [];
+            playlistTitle ||= "Audio playlist player";
+            this.playlistTitle = playlistTitle;
+            document.title = playlistTitle;
+            document.getElementById("titleMain").textContent = playlistTitle;
+
+            this.mediaQueue = new MediaQueue(items);
+
             let tbodyHTML = "";
-            let itemTitle = "";
-            let itemIndex = 0;
-            for (const line of lines) {
-              if (line === "") continue;
-
-              if (line.startsWith("#")) {
-                if (line.startsWith("#EXTINF:")) {
-                  itemTitle = line.split(",").slice(1).join(",");
-                  continue;
-                }
-
-                if (line.startsWith("#PLAYLIST:")) {
-                  this.playlistTitle = line.substring(10);
-
-                  document.title = this.playlistTitle;
-                  document.getElementById("titleMain").textContent =
-                    this.playlistTitle;
-
-                  continue;
-                }
-
-                continue;
-              }
-
-              items.push({ title: itemTitle, url: line });
+            for (const i in items) {
+              const escItemTitle = xmlescape(items[i].title);
 
               tbodyHTML += `
-                <tr class="cursor-pointer" title="${xmlescape(itemTitle)}"
-                  data-index="${itemIndex}"
+                <tr class="cursor-pointer" title="${escItemTitle}"
+                  data-index="${i}"
                   onclick="App.trItem_onclick(this)">
                   <td>
                     <span class="material-symbols-outlined">music_note</span>
                   </td>
-                  <td>${xmlescape(itemTitle)}</td>
+                  <td>${escItemTitle}</td>
                 </tr>
               `;
-
-              itemIndex++;
             }
-
-            this.mediaQueue = new MediaQueue(items);
-
             tbody.innerHTML = tbodyHTML;
 
             this.setShuffleEnabled(cfg.shuffle);
