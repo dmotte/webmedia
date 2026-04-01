@@ -386,18 +386,6 @@
 
         ////////////////////////////////////////////////////////////////////////
 
-        static setupMediaSession() {
-          if (!("mediaSession" in navigator)) return;
-
-          navigator.mediaSession.setActionHandler("previoustrack", () => {
-            document.getElementById("btnPrev").click();
-          });
-
-          navigator.mediaSession.setActionHandler("nexttrack", () => {
-            document.getElementById("btnNext").click();
-          });
-        }
-
         static loadHash() {
           const [path, cfg] = this.parseHash();
 
@@ -463,7 +451,16 @@
         }
 
         static load() {
-          this.setupMediaSession();
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.setActionHandler("previoustrack", () => {
+              document.getElementById("btnPrev").click();
+            });
+
+            navigator.mediaSession.setActionHandler("nexttrack", () => {
+              document.getElementById("btnNext").click();
+            });
+          }
+
           this.loadHash();
         }
 
