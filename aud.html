@@ -67,7 +67,7 @@
   </head>
 
   <body onload="App.loadHash()" onhashchange="App.loadHash()">
-    <audio controls id="container" autofocus>
+    <audio controls id="container" autofocus onblur="this.focus()">
       <source />
       Your browser does not support the HTML5 audio element
     </audio>
