@@ -54,7 +54,8 @@
 
           container.load();
 
-          if (cfg.play) container.play();
+          if (cfg.play && navigator.userActivation.hasBeenActive)
+            container.play();
         }
       }
     </script>

@@ -359,7 +359,7 @@
               row.dataset.index === strCurrentIndex,
             );
 
-          if (play) container.play();
+          if (play && navigator.userActivation.hasBeenActive) container.play();
         }
 
         static setShuffleEnabled(x) {

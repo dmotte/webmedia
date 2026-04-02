@@ -173,7 +173,8 @@
 
             this.showModal("");
 
-            if (cfg.play) container.play();
+            if (cfg.play && navigator.userActivation.hasBeenActive)
+              container.play();
           })().catch((error) => {
             console.error(error);
             this.showMsg(error);
