@@ -18,6 +18,11 @@
         font-family: sans-serif;
       }
 
+      #dialogMsg::backdrop {
+        background-color: #1118;
+        backdrop-filter: blur(3px);
+      }
+
       #container {
         margin: 0px;
         position: absolute;
@@ -33,6 +38,20 @@
 
     <script type="text/javascript">
       class App {
+        static showModalMsg(msg = "") {
+          const dialogMsg = document.getElementById("dialogMsg");
+
+          if (msg === "") {
+            dialogMsg.close();
+            return;
+          }
+
+          dialogMsg.textContent = msg;
+          dialogMsg.showModal();
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
         static parseHash(hash = "") {
           if (hash === "") hash = window.location.hash;
           if (hash.startsWith("#")) hash = hash.substring(1);
@@ -50,6 +69,8 @@
           return [path, cfg];
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         static loadHash() {
           const [path, cfg] = this.parseHash();
 
@@ -58,11 +79,27 @@
           if (path === "") container.style.backgroundImage = "";
           else container.style.backgroundImage = "url(" + path + ")";
         }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        static body_onload() {
+          window.addEventListener("error", (event) => {
+            this.showModalMsg(`ERROR: ${event.error}`);
+          });
+
+          window.addEventListener("unhandledrejection", (event) => {
+            this.showModalMsg(`ERROR: ${event.reason}`);
+          });
+
+          this.loadHash();
+        }
       }
     </script>
   </head>
 
-  <body onload="App.loadHash()" onhashchange="App.loadHash()">
+  <body onload="App.body_onload()" onhashchange="App.loadHash()">
     <div id="container"></div>
+
+    <dialog id="dialogMsg" closedby="none"></dialog>
   </body>
 </html>

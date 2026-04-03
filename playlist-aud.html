@@ -17,13 +17,11 @@
       :root {
         color-scheme: light dark;
 
-        --modal-bg: #eee;
         --lower-bg: #eee;
       }
 
       @media (prefers-color-scheme: dark) {
         :root {
-          --modal-bg: #000;
           --lower-bg: #000;
         }
       }
@@ -32,6 +30,11 @@
       td,
       th {
         font-family: sans-serif;
+      }
+
+      #dialogMsg::backdrop {
+        background-color: #1118;
+        backdrop-filter: blur(3px);
       }
 
       .font-monospace {
@@ -51,17 +54,6 @@
 
       .color-grey {
         color: #888;
-      }
-
-      .modal {
-        margin: 0px;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px;
-
-        background-color: var(--modal-bg);
       }
 
       #divUpperOut {
@@ -244,14 +236,16 @@
       }
 
       class App {
-        static showModal(id) {
-          for (const modal of document.querySelectorAll(".modal"))
-            modal.hidden = modal.id !== id;
-        }
+        static showModalMsg(msg = "") {
+          const dialogMsg = document.getElementById("dialogMsg");
 
-        static showMsg(msg) {
-          document.getElementById("spanMsg").textContent = msg;
-          this.showModal("modalMsg");
+          if (msg === "") {
+            dialogMsg.close();
+            return;
+          }
+
+          dialogMsg.textContent = msg;
+          dialogMsg.showModal();
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -320,46 +314,17 @@
 
         ////////////////////////////////////////////////////////////////////////
 
-        static loadCurrentItem(play = false) {
-          const container = document.getElementById("container");
-          const source = container.children[0];
-          const tbody = document.getElementById("tblList").tBodies[0];
+        static updatePlaybackStatus() {
+          const container = document.getElementById("container"),
+            btnPlayPause = document.getElementById("btnPlayPause");
 
-          const currentItem = this.mediaQueue?.getCurrentItem() ?? null;
-
-          if (currentItem === null) {
-            container.currentTime = 0;
-            source.removeAttribute("src");
-            container.load();
-
-            document.title = this.playlistTitle;
-
-            const btnPlayPause = document.getElementById("btnPlayPause");
+          if (container.paused) {
             btnPlayPause.textContent = "play_arrow";
             btnPlayPause.title = "Play";
-
-            document.getElementById("rangeSeek").max = 0;
-            document.getElementById("spanTimeDuration").textContent = "--:--";
-
-            for (const row of tbody.rows) row.classList.remove("font-bold");
-
-            return;
+          } else {
+            btnPlayPause.textContent = "pause";
+            btnPlayPause.title = "Pause";
           }
-
-          container.currentTime = 0;
-          source.src = currentItem.url;
-          container.load();
-
-          document.title = currentItem.title;
-
-          const strCurrentIndex = String(this.mediaQueue.getCurrentIndex());
-          for (const row of tbody.rows)
-            row.classList.toggle(
-              "font-bold",
-              row.dataset.index === strCurrentIndex,
-            );
-
-          if (play && navigator.userActivation.hasBeenActive) container.play();
         }
 
         static setShuffleEnabled(x) {
@@ -386,37 +351,103 @@
 
         ////////////////////////////////////////////////////////////////////////
 
-        static loadHash() {
+        static loadCurrentItem(play = false) {
+          const container = document.getElementById("container");
+          const source = container.children[0];
+
+          const tbody = document.getElementById("tblList").tBodies[0];
+
+          const currentItem = this.mediaQueue?.getCurrentItem() ?? null;
+
+          if (currentItem === null) {
+            container.currentTime = 0;
+            source.removeAttribute("src");
+            container.load();
+
+            document.title = this.playlistTitle;
+
+            this.updatePlaybackStatus();
+
+            document.getElementById("rangeSeek").max = 0;
+            document.getElementById("spanTimeDuration").textContent = "--:--";
+
+            for (const row of tbody.rows) row.classList.remove("font-bold");
+
+            return Promise.resolve();
+          } else {
+            container.currentTime = 0;
+            source.src = currentItem.url;
+            container.load();
+
+            document.title = currentItem.title;
+
+            this.updatePlaybackStatus();
+
+            // Note: in this case the rangeSeek.max and
+            // spanTimeDuration.textContent update will take place in the
+            // container_onloadedmetadata event handler
+
+            const strCurrentIndex = String(this.mediaQueue.getCurrentIndex());
+            for (const row of tbody.rows)
+              row.classList.toggle(
+                "font-bold",
+                row.dataset.index === strCurrentIndex,
+              );
+
+            return play && navigator.userActivation.hasBeenActive
+              ? container.play()
+              : Promise.resolve();
+          }
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        static body_onload() {
+          window.addEventListener("error", (event) => {
+            this.showModalMsg(`ERROR: ${event.error}`);
+          });
+
+          window.addEventListener("unhandledrejection", (event) => {
+            this.showModalMsg(`ERROR: ${event.reason}`);
+          });
+
+          //////////////////////////////////////////////////////////////////////
+
+          if ("mediaSession" in navigator) {
+            navigator.mediaSession.setActionHandler("previoustrack", () => {
+              const dialogMsg = document.getElementById("dialogMsg");
+              if (dialogMsg.open) return;
+
+              document.getElementById("btnPrev").click();
+            });
+
+            navigator.mediaSession.setActionHandler("nexttrack", () => {
+              const dialogMsg = document.getElementById("dialogMsg");
+              if (dialogMsg.open) return;
+
+              document.getElementById("btnNext").click();
+            });
+          }
+
+          //////////////////////////////////////////////////////////////////////
+
           const [path, cfg] = this.parseHash();
 
+          this.showModalMsg("Loading playlist...");
+
           (async () => {
-            const container = document.getElementById("container");
-            const source = container.children[0];
-            const tbody = document.getElementById("tblList").tBodies[0];
-
-            tbody.innerHTML = "";
-
-            this.mediaQueue = null;
-            this.loadCurrentItem();
-
-            if (path === "") {
-              this.showModal("");
-              return;
-            }
-
-            this.showMsg("Loading playlist...");
-
             const response = await fetch(path);
             if (!response.ok) throw new Error("HTTP error " + response.status);
             const responseText = await response.text();
             let [playlistTitle, items] = this.parseM3UPlaylist(responseText);
 
-            playlistTitle ||= "Audio playlist player";
+            playlistTitle ||= this.playlistTitle;
             this.playlistTitle = playlistTitle;
-            document.title = playlistTitle;
             document.getElementById("titleMain").textContent = playlistTitle;
 
             this.mediaQueue = new MediaQueue(items);
+
+            const tbody = document.getElementById("tblList").tBodies[0];
 
             let tbodyHTML = "";
             for (const i in items) {
@@ -438,35 +469,19 @@
             this.setShuffleEnabled(cfg.shuffle);
             this.setRepeatMode(cfg.repeat);
 
-            if (cfg.item >= 0) {
-              this.mediaQueue.setCurrent(cfg.item);
-              this.loadCurrentItem(cfg.play);
-            }
+            if (cfg.item >= 0) this.mediaQueue.setCurrent(cfg.item);
 
-            this.showModal("");
-          })().catch((error) => {
-            console.error(error);
-            this.showMsg(error);
-          });
+            await this.loadCurrentItem(cfg.play);
+
+            this.showModalMsg();
+          })();
         }
-
-        static load() {
-          if ("mediaSession" in navigator) {
-            navigator.mediaSession.setActionHandler("previoustrack", () => {
-              document.getElementById("btnPrev").click();
-            });
-
-            navigator.mediaSession.setActionHandler("nexttrack", () => {
-              document.getElementById("btnNext").click();
-            });
-          }
-
-          this.loadHash();
-        }
-
-        ////////////////////////////////////////////////////////////////////////
 
         static body_onkeydown(event) {
+          const dialogMsg = document.getElementById("dialogMsg");
+
+          if (dialogMsg.open) return;
+
           const btnPlayPause = document.getElementById("btnPlayPause"),
             btnPrev = document.getElementById("btnPrev"),
             btnNext = document.getElementById("btnNext"),
@@ -494,20 +509,26 @@
 
         static trItem_onclick(elem) {
           this.mediaQueue.setCurrent(parseInt(elem.dataset.index, 10));
-          this.loadCurrentItem(true);
+
+          this.showModalMsg("Starting playback...");
+          this.loadCurrentItem(true).then(() => this.showModalMsg());
         }
 
         static btnPlayPause_onclick() {
           if (this.mediaQueue.getCurrentIndex() === null) {
             this.mediaQueue.setCurrent(0);
-            this.loadCurrentItem(true);
+
+            this.showModalMsg("Starting playback...");
+            this.loadCurrentItem(true).then(() => this.showModalMsg());
             return;
           }
 
           const container = document.getElementById("container");
 
-          if (container.paused) container.play();
-          else container.pause();
+          if (container.paused) {
+            this.showModalMsg("Starting playback...");
+            container.play().then(() => this.showModalMsg());
+          } else container.pause();
         }
 
         static btnPrev_onclick() {
@@ -524,7 +545,9 @@
               this.repeatMode === "all",
             ),
           );
-          this.loadCurrentItem(true);
+
+          this.showModalMsg("Starting playback...");
+          this.loadCurrentItem(true).then(() => this.showModalMsg());
         }
 
         static btnNext_onclick() {
@@ -534,7 +557,9 @@
               this.repeatMode === "all",
             ),
           );
-          this.loadCurrentItem(true);
+
+          this.showModalMsg("Starting playback...");
+          this.loadCurrentItem(true).then(() => this.showModalMsg());
         }
 
         static btnShuffle_onclick() {
@@ -588,30 +613,26 @@
           const container = document.getElementById("container"),
             btnNext = document.getElementById("btnNext");
 
-          if (this.repeatMode === "one") container.play();
-          else btnNext.click();
+          if (this.repeatMode === "one") {
+            this.showModalMsg("Starting playback...");
+            container.play().then(() => this.showModalMsg());
+          } else btnNext.click();
         }
 
         static container_onplay() {
-          const btnPlayPause = document.getElementById("btnPlayPause");
-
-          btnPlayPause.textContent = "pause";
-          btnPlayPause.title = "Pause";
+          this.updatePlaybackStatus();
         }
 
         static container_onpause() {
-          const btnPlayPause = document.getElementById("btnPlayPause");
-
-          btnPlayPause.textContent = "play_arrow";
-          btnPlayPause.title = "Play";
+          this.updatePlaybackStatus();
         }
       }
     </script>
   </head>
 
   <body
-    onload="App.load()"
-    onhashchange="App.loadHash()"
+    onload="App.body_onload()"
+    onhashchange="window.location.reload()"
     onkeydown="App.body_onkeydown(event)"
   >
     <audio
@@ -736,8 +757,6 @@
       </div>
     </div>
 
-    <div id="modalMsg" class="modal" hidden>
-      <span id="spanMsg"></span>
-    </div>
+    <dialog id="dialogMsg" closedby="none"></dialog>
   </body>
 </html>

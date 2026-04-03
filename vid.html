@@ -18,6 +18,11 @@
         font-family: sans-serif;
       }
 
+      #dialogMsg::backdrop {
+        background-color: #1118;
+        backdrop-filter: blur(3px);
+      }
+
       #container {
         margin: 0px;
         position: absolute;
@@ -30,6 +35,20 @@
 
     <script type="text/javascript">
       class App {
+        static showModalMsg(msg = "") {
+          const dialogMsg = document.getElementById("dialogMsg");
+
+          if (msg === "") {
+            dialogMsg.close();
+            return;
+          }
+
+          dialogMsg.textContent = msg;
+          dialogMsg.showModal();
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
         static parseHash(hash = "") {
           if (hash === "") hash = window.location.hash;
           if (hash.startsWith("#")) hash = hash.substring(1);
@@ -49,6 +68,8 @@
           return [path, cfg];
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         static loadHash() {
           const [path, cfg] = this.parseHash();
 
@@ -60,17 +81,35 @@
 
           container.load();
 
-          if (cfg.play && navigator.userActivation.hasBeenActive)
-            container.play();
+          if (cfg.play && navigator.userActivation.hasBeenActive) {
+            this.showModalMsg("Starting playback...");
+            container.play().then(() => this.showModalMsg());
+          }
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        static body_onload() {
+          window.addEventListener("error", (event) => {
+            this.showModalMsg(`ERROR: ${event.error}`);
+          });
+
+          window.addEventListener("unhandledrejection", (event) => {
+            this.showModalMsg(`ERROR: ${event.reason}`);
+          });
+
+          this.loadHash();
         }
       }
     </script>
   </head>
 
-  <body onload="App.loadHash()" onhashchange="App.loadHash()">
+  <body onload="App.body_onload()" onhashchange="App.loadHash()">
     <video controls id="container" autofocus onblur="this.focus()">
       <source />
       Your browser does not support the HTML5 video element
     </video>
+
+    <dialog id="dialogMsg" closedby="none"></dialog>
   </body>
 </html>

@@ -14,8 +14,6 @@
         --input-bg: #eee;
         --input-text: #000;
         --input-border: #888;
-
-        --modal-bg: #eee;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -23,8 +21,6 @@
           --input-bg: #000;
           --input-text: #ccc;
           --input-border: #888;
-
-          --modal-bg: #000;
         }
       }
 
@@ -32,6 +28,11 @@
       td,
       th {
         font-family: sans-serif;
+      }
+
+      #dialogMsg::backdrop {
+        background-color: #1118;
+        backdrop-filter: blur(3px);
       }
 
       input {
@@ -51,19 +52,12 @@
         height: 100%;
       }
 
-      .modal {
-        margin: 0px;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px;
-
-        background-color: var(--modal-bg);
-      }
-
-      #modalPsw {
+      #dialogPsw {
         width: 50%;
+      }
+      #dialogPsw::backdrop {
+        background-color: #1118;
+        backdrop-filter: blur(3px);
       }
       #pswMain {
         width: calc(100% - 55px);
@@ -71,7 +65,6 @@
       }
       #btnLoad {
         width: 50px;
-        box-sizing: border-box;
         font-weight: bold;
       }
     </style>
@@ -85,15 +78,19 @@
 
     <script type="text/javascript">
       class App {
-        static showModal(id) {
-          for (const modal of document.querySelectorAll(".modal"))
-            modal.hidden = modal.id !== id;
+        static showModalMsg(msg = "") {
+          const dialogMsg = document.getElementById("dialogMsg");
+
+          if (msg === "") {
+            dialogMsg.close();
+            return;
+          }
+
+          dialogMsg.textContent = msg;
+          dialogMsg.showModal();
         }
 
-        static showMsg(msg) {
-          document.getElementById("spanMsg").textContent = msg;
-          this.showModal("modalMsg");
-        }
+        ////////////////////////////////////////////////////////////////////////
 
         static parseHash(hash = "") {
           if (hash === "") hash = window.location.hash;
@@ -114,39 +111,36 @@
           return [path, cfg];
         }
 
+        ////////////////////////////////////////////////////////////////////////
+
         static loadHash() {
           const [path, cfg] = this.parseHash();
 
-          const pswMain = document.getElementById("pswMain");
-
-          const psw = pswMain.value;
-
+          const dialogPsw = document.getElementById("dialogPsw");
+          const psw = document.getElementById("pswMain").value;
           if (psw === "") {
-            this.showModal("modalPsw");
-            pswMain.focus();
+            dialogPsw.showModal();
             return;
           }
+          dialogPsw.close();
+
+          const container = document.getElementById("container");
+          const source = container.children[0];
+
+          const oldURL = source.src;
+          source.removeAttribute("src");
+          container.load();
+          if (oldURL) URL.revokeObjectURL(oldURL);
+
+          if (path === "") return;
+
+          this.showModalMsg("Downloading media...");
 
           (async () => {
-            const container = document.getElementById("container");
-            const source = container.children[0];
-
-            const oldURL = source.src;
-            source.removeAttribute("src");
-            container.load();
-            if (oldURL) URL.revokeObjectURL(oldURL);
-
-            if (path === "") {
-              this.showModal("");
-              return;
-            }
-
-            this.showMsg("Downloading media...");
-
             const response = await fetch(path);
             if (!response.ok) throw new Error("HTTP error " + response.status);
 
-            this.showMsg("Decrypting media...");
+            this.showModalMsg("Decrypting media...");
 
             const encryptedMessage = await openpgp.readMessage({
               binaryMessage: response.body,
@@ -172,20 +166,33 @@
             source.src = url;
             container.load();
 
-            this.showModal("");
+            if (cfg.play && navigator.userActivation.hasBeenActive) {
+              this.showModalMsg("Starting playback...");
+              await container.play();
+            }
 
-            if (cfg.play && navigator.userActivation.hasBeenActive)
-              container.play();
-          })().catch((error) => {
-            console.error(error);
-            this.showMsg(error);
+            this.showModalMsg();
+          })();
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        static body_onload() {
+          window.addEventListener("error", (event) => {
+            this.showModalMsg(`ERROR: ${event.error}`);
           });
+
+          window.addEventListener("unhandledrejection", (event) => {
+            this.showModalMsg(`ERROR: ${event.reason}`);
+          });
+
+          this.loadHash();
         }
       }
     </script>
   </head>
 
-  <body onload="App.loadHash()" onhashchange="App.loadHash()">
+  <body onload="App.body_onload()" onhashchange="App.loadHash()">
     <video
       controls
       id="container"
@@ -196,18 +203,17 @@
       Your browser does not support the HTML5 video element
     </video>
 
-    <div id="modalMsg" class="modal" hidden>
-      <span id="spanMsg"></span>
-    </div>
-
-    <div id="modalPsw" class="modal" hidden>
+    <dialog id="dialogPsw" closedby="none">
       <input
         type="password"
         id="pswMain"
         placeholder="Password"
+        autofocus
         onkeydown="if (event.key === 'Enter') btnLoad.click();"
       />
       <input type="button" id="btnLoad" value="OK" onclick="App.loadHash()" />
-    </div>
+    </dialog>
+
+    <dialog id="dialogMsg" closedby="none"></dialog>
   </body>
 </html>
