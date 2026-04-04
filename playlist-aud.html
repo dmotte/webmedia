@@ -234,6 +234,12 @@
         );
       }
 
+      const RepeatMode = Object.freeze({
+        OFF: Symbol("off"),
+        ALL: Symbol("all"),
+        ONE: Symbol("one"),
+      });
+
       class App {
         static showModalMsg(msg = "") {
           const dialogMsg = document.getElementById("dialogMsg");
@@ -294,7 +300,10 @@
           const cfg = Object.fromEntries(new URLSearchParams(query).entries());
 
           cfg.shuffle = cfg.shuffle === "y";
-          if (!["off", "all", "one"].includes(cfg.repeat)) cfg.repeat = "off";
+          cfg.repeat =
+            Object.values(RepeatMode).find(
+              (x) => x.description === cfg.repeat,
+            ) ?? RepeatMode.OFF;
 
           cfg.item = parseInt(cfg.item ?? "-1", 10);
           cfg.play = "play" in cfg;
@@ -309,7 +318,7 @@
         static mediaQueue = null;
 
         static shuffleEnabled = false;
-        static repeatMode = "off"; // Possible values: "off", "all", "one"
+        static repeatMode = RepeatMode.OFF;
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -338,14 +347,15 @@
         }
 
         static setRepeatMode(x) {
-          if (!["off", "all", "one"].includes(x))
-            throw new Error("Invalid repeat mode " + x);
+          if (!Object.values(RepeatMode).includes(x))
+            throw new Error(`Invalid repeat mode ${x}`);
 
           this.repeatMode = x;
 
           const btnRepeat = document.getElementById("btnRepeat");
-          btnRepeat.textContent = x === "one" ? "repeat_one" : "repeat";
-          btnRepeat.classList.toggle("color-grey", x === "off");
+          btnRepeat.textContent =
+            x === RepeatMode.ONE ? "repeat_one" : "repeat";
+          btnRepeat.classList.toggle("color-grey", x === RepeatMode.OFF);
         }
 
         ////////////////////////////////////////////////////////////////////////
@@ -541,7 +551,7 @@
           this.mediaQueue.setCurrent(
             this.mediaQueue.getPrevIndex(
               this.shuffleEnabled,
-              this.repeatMode === "all",
+              this.repeatMode === RepeatMode.ALL,
             ),
           );
 
@@ -553,7 +563,7 @@
           this.mediaQueue.setCurrent(
             this.mediaQueue.getNextIndex(
               this.shuffleEnabled,
-              this.repeatMode === "all",
+              this.repeatMode === RepeatMode.ALL,
             ),
           );
 
@@ -566,8 +576,10 @@
         }
 
         static btnRepeat_onclick() {
+          const modes = Object.values(RepeatMode);
+
           this.setRepeatMode(
-            { off: "all", all: "one", one: "off" }[this.repeatMode],
+            modes[(modes.indexOf(this.repeatMode) + 1) % modes.length],
           );
         }
 
@@ -612,7 +624,7 @@
           const container = document.getElementById("container"),
             btnNext = document.getElementById("btnNext");
 
-          if (this.repeatMode === "one") {
+          if (this.repeatMode === RepeatMode.ONE) {
             this.showModalMsg("Starting playback...");
             container.play().then(() => this.showModalMsg());
           } else btnNext.click();
