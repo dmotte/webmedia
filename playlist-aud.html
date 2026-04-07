@@ -440,6 +440,12 @@
 
           //////////////////////////////////////////////////////////////////////
 
+          // Show the page body only when loaded, to prevent
+          // the user from interacting early
+          document.body.hidden = false;
+
+          //////////////////////////////////////////////////////////////////////
+
           const [path, cfg] = this.parseHash();
 
           this.showModalMsg("Loading playlist...");
@@ -644,6 +650,7 @@
   </head>
 
   <body
+    hidden
     onload="App.body_onload()"
     onhashchange="window.location.reload()"
     onkeydown="App.body_onkeydown(event)"

@@ -191,6 +191,10 @@
             this.showModalMsg(`ERROR: ${event.reason}`);
           });
 
+          // Show the page body only when loaded, to prevent
+          // the user from interacting early
+          document.body.hidden = false;
+
           this.loadHash();
         }
       }
@@ -199,7 +203,7 @@
     </script>
   </head>
 
-  <body onload="App.body_onload()" onhashchange="App.loadHash()">
+  <body hidden onload="App.body_onload()" onhashchange="App.loadHash()">
     <audio
       controls
       id="container"
