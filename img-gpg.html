@@ -72,14 +72,20 @@
       }
     </style>
 
-    <script
-      type="text/javascript"
-      src="https://unpkg.com/openpgp@6.3.0/dist/openpgp.min.js"
-      integrity="sha384-Z5tStPoeClmuLPd1gAwdTCU53WcAkUjBNw7mEEvrQumVuNqEl52A9Nx5IhFdKE/c"
-      crossorigin="anonymous"
-    ></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "openpgp": "https://unpkg.com/openpgp@6.3.0/dist/openpgp.min.mjs"
+        },
+        "integrity": {
+          "https://unpkg.com/openpgp@6.3.0/dist/openpgp.min.mjs": "sha384-qtSN4ysyvhD7raWueOpEzAS+ty5Oc5EbPdhPjDZX+354zq/VwZPytk9qWGuMKHnH"
+        }
+      }
+    </script>
 
-    <script type="text/javascript">
+    <script type="module">
+      import * as openpgp from "openpgp";
+
       class App {
         static showModalMsg(msg = "") {
           const dialogMsg = document.getElementById("dialogMsg");
@@ -184,6 +190,8 @@
           this.loadHash();
         }
       }
+
+      window.App = App;
     </script>
   </head>
 

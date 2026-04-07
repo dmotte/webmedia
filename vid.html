@@ -33,7 +33,7 @@
       }
     </style>
 
-    <script type="text/javascript">
+    <script type="module">
       class App {
         static showModalMsg(msg = "") {
           const dialogMsg = document.getElementById("dialogMsg");
@@ -101,6 +101,8 @@
           this.loadHash();
         }
       }
+
+      window.App = App;
     </script>
   </head>
 
