@@ -420,6 +420,10 @@
             this.showModalMsg(`ERROR: ${event.reason}`);
           });
 
+          // Show the page body only when loaded, to prevent
+          // the user from interacting early
+          document.body.hidden = false;
+
           //////////////////////////////////////////////////////////////////////
 
           if ("mediaSession" in navigator) {
@@ -437,12 +441,6 @@
               document.getElementById("btnNext").click();
             });
           }
-
-          //////////////////////////////////////////////////////////////////////
-
-          // Show the page body only when loaded, to prevent
-          // the user from interacting early
-          document.body.hidden = false;
 
           //////////////////////////////////////////////////////////////////////
 
