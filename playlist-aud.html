@@ -463,8 +463,8 @@
             const tbody = document.getElementById("tblList").tBodies[0];
 
             let tbodyHTML = "";
-            for (const i in items) {
-              const escItemTitle = xmlescape(items[i].title);
+            for (const [i, item] of items.entries()) {
+              const escItemTitle = xmlescape(item.title);
 
               tbodyHTML += `
                 <tr class="cursor-pointer" title="${escItemTitle}"
