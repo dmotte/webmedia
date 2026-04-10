@@ -256,8 +256,8 @@
         ////////////////////////////////////////////////////////////////////////
 
         static parseM3UPlaylist(text = "") {
-          let playlistTitle = "",
-            items = [];
+          let playlistTitle = "";
+          const items = [];
 
           let itemTitle = "";
           for (const line of text.split(/\r?\n/u)) {
