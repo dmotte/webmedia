@@ -446,6 +446,8 @@
 
           const [path, cfg] = this.parseHash();
 
+          if (path === "") throw new Error("The playlist path is empty");
+
           this.showModalMsg("Loading playlist...");
 
           (async () => {
